@@ -2,7 +2,7 @@
 // Deck — Deck management: shuffle, deal, reshuffle
 // ============================================================
 
-import { Card, CardType } from '../../packages/shared/src/types';
+import { Card, CardType } from '@uno/shared';
 import { createFullDeck } from './Card';
 
 /**

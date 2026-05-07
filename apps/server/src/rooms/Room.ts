@@ -1,4 +1,4 @@
-import { RoomState, RoomStatus, PlayerInfo } from '../../packages/shared/src/types';
+import { RoomState, RoomStatus, PlayerInfo } from '@uno/shared';
 import { Player } from '../game/Player';
 import { GameEngine } from '../game/GameEngine';
 

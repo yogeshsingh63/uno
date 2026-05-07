@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, Pressable, Modal } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, FadeIn, SlideInDown } from 'react-native-reanimated';
-import { CardColor } from '../../../../packages/shared/src/types';
+import { CardColor } from '@uno/shared';
 import { Colors } from '../../constants/colors';
 import { SPRING_MODAL } from '../../constants/animations';
 

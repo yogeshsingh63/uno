@@ -5,7 +5,7 @@ import { useGameStore } from '../../stores/gameStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import { useHaptics } from '../../hooks/useHaptics';
-import { Card as CardType, CardColor, CardType as CType, GamePhase } from '../../../../packages/shared/src/types';
+import { Card as CardType, CardColor, CardType as CType, GamePhase } from '@uno/shared';
 import { Colors } from '../../constants/colors';
 
 import CardHand from '../../components/cards/CardHand';

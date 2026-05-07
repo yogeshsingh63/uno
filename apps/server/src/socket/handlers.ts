@@ -1,11 +1,11 @@
 import { Server, Socket } from 'socket.io';
-import { CLIENT_EVENTS, SERVER_EVENTS } from '../../packages/shared/src/events';
+import { CLIENT_EVENTS, SERVER_EVENTS } from '@uno/shared';
 import {
   CreateRoomPayload, JoinRoomPayload, PlayCardPayload, DrawCardPayload,
   PlayDrawnCardPayload, CallUnoPayload, ChallengeUnoPayload, ChallengeDrawFourPayload,
   ChooseColorPayload, StartGamePayload, PlayerReadyPayload, LeaveRoomPayload, AddBotPayload,
   GamePhase, CardColor, RoomStatus,
-} from '../../packages/shared/src/types';
+} from '@uno/shared';
 import { RoomManager } from '../rooms/RoomManager';
 import { Player } from '../game/Player';
 import { BotPlayer } from '../ai/BotPlayer';

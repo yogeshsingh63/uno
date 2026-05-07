@@ -1,6 +1,6 @@
 import { GameEngine } from '../game/GameEngine';
 import { Player } from '../game/Player';
-import { CardColor, CardType, Card } from '../../packages/shared/src/types';
+import { CardColor, CardType, Card } from '@uno/shared';
 
 export class BotPlayer {
   private game: GameEngine;

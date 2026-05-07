@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, { useAnimatedStyle, withRepeat, withTiming, useSharedValue, withSequence } from 'react-native-reanimated';
-import { Card as CardType, CardColor } from '../../../../packages/shared/src/types';
+import { Card as CardType, CardColor } from '@uno/shared';
 import CardComponent from './Card';
 import { Colors, UNO_CARD_COLORS } from '../../constants/colors';
 import { CARD_WIDTH, CARD_HEIGHT } from '../../constants/cardData';

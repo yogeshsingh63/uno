@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, View, FlatList, Dimensions } from 'react-native';
-import { Card as CardType, CardColor } from '../../../../packages/shared/src/types';
-import { isCardPlayable } from '../../../../apps/server/src/game/Player';
+import { Card as CardType, CardColor, isCardPlayable } from '@uno/shared';
 import CardComponent from './Card';
 import { CARD_WIDTH, CARD_HAND_OVERLAP } from '../../constants/cardData';
 

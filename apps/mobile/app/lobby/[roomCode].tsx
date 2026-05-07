@@ -7,7 +7,7 @@ import { Colors } from '../../constants/colors';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useGameSocket } from '../../hooks/useGameSocket';
-import { PlayerInfo } from '../../../../packages/shared/src/types';
+import { PlayerInfo } from '@uno/shared';
 
 export default function LobbyScreen() {
   const { roomCode } = useLocalSearchParams<{ roomCode: string }>();

@@ -5,7 +5,7 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withSequence, withTiming,
   interpolate, Extrapolation,
 } from 'react-native-reanimated';
-import { Card as CardType, CardColor, CardType as CType } from '../../../../packages/shared/src/types';
+import { Card as CardType, CardColor, CardType as CType } from '@uno/shared';
 import { Colors, UNO_CARD_COLORS } from '../../constants/colors';
 import { CARD_SYMBOLS, CARD_WIDTH, CARD_HEIGHT, CARD_BORDER_RADIUS } from '../../constants/cardData';
 import { SPRING_BOUNCE } from '../../constants/animations';

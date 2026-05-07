@@ -1,7 +1,7 @@
 import {
   Card, CardColor, CardType, GamePhase, PlayDirection,
   PublicGameState, PlayerGameState, GameAction, GameActionType, RoundScore,
-} from '../../packages/shared/src/types';
+} from '@uno/shared';
 import { Player, isCardPlayable } from './Player';
 import { createShuffledDeck, dealCards, drawStartingCard, reshuffleDiscardIntoDraw } from './Deck';
 import { calculateRoundScore, checkGameOver } from './Scoring';

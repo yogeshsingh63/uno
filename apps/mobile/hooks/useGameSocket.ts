@@ -3,13 +3,13 @@ import { useRouter } from 'expo-router';
 import { socketService } from '../services/socketService';
 import { useGameStore } from '../stores/gameStore';
 import { usePlayerStore } from '../stores/playerStore';
-import { SERVER_EVENTS, CLIENT_EVENTS } from '../../../packages/shared/src/events';
+import { SERVER_EVENTS, CLIENT_EVENTS } from '@uno/shared';
 import {
   RoomCreatedPayload, RoomJoinedPayload, GameStartedPayload,
   GameStateUpdatePayload, CardDrawnPayload, RoundEndedPayload,
   GameEndedPayload, UnoPenaltyPayload, ChallengeResultPayload,
   RoomState, GamePhase, CardColor, PublicGameState,
-} from '../../../packages/shared/src/types';
+} from '@uno/shared';
 
 export function useGameSocket() {
   const router = useRouter();

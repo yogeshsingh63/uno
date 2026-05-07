@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, { useAnimatedStyle, withRepeat, withSequence, withTiming, useSharedValue } from 'react-native-reanimated';
-import { PlayerGameState } from '../../../../packages/shared/src/types';
+import { PlayerGameState } from '@uno/shared';
 import { Colors } from '../../constants/colors';
 
 interface PlayerSlotProps {

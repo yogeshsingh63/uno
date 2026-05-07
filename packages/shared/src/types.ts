@@ -263,3 +263,12 @@ export interface ErrorPayload {
   message: string;
   code?: string;
 }
+
+export function isCardPlayable(card: Card, topCard: Card, currentColor: CardColor): boolean {
+  if (card.type === CardType.WILD || card.type === CardType.WILD_DRAW_FOUR) return true;
+  if (card.color === currentColor) return true;
+  if (card.type === CardType.NUMBER && topCard.type === CardType.NUMBER && card.value === topCard.value) return true;
+  if (card.type !== CardType.NUMBER && card.type === topCard.type) return true;
+  return false;
+}
+

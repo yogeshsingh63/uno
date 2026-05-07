@@ -2,7 +2,7 @@
 // Card — Card interfaces and deck factory
 // ============================================================
 
-import { Card, CardColor, CardType } from '../../packages/shared/src/types';
+import { Card, CardColor, CardType } from '@uno/shared';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

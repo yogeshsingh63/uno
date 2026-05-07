@@ -1,5 +1,5 @@
 import { Player } from './Player';
-import { RoundScore } from '../../packages/shared/src/types';
+import { RoundScore } from '@uno/shared';
 
 export function calculateRoundScore(winnerId: string, players: Player[]): RoundScore {
   const playerScores: Record<string, number> = {};

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import {
   Card, CardColor, PublicGameState, RoomState, RoomStatus,
   GamePhase, PlayerGameState,
-} from '../../../packages/shared/src/types';
+} from '@uno/shared';
 
 interface GameStore {
   // Connection

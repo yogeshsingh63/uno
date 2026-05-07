@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
-import { PlayDirection } from '../../../../packages/shared/src/types';
+import { PlayDirection } from '@uno/shared';
 import { Colors } from '../../constants/colors';
 
 interface DirectionArrowProps {

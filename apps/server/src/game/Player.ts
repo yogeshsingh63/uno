@@ -2,7 +2,7 @@
 // Player — Server-side player state management
 // ============================================================
 
-import { Card, CardColor, CardType } from '../../packages/shared/src/types';
+import { Card, CardColor, CardType, isCardPlayable } from '@uno/shared';
 
 export class Player {
   public id: string;
@@ -119,40 +119,4 @@ export class Player {
   }
 }
 
-/**
- * Check if a card can be played on the current discard pile
- */
-export function isCardPlayable(
-  card: Card,
-  topCard: Card,
-  currentColor: CardColor
-): boolean {
-  // Wild cards are always playable
-  if (card.type === CardType.WILD || card.type === CardType.WILD_DRAW_FOUR) {
-    return true;
-  }
 
-  // Match by color
-  if (card.color === currentColor) {
-    return true;
-  }
-
-  // Match by number (for number cards)
-  if (
-    card.type === CardType.NUMBER &&
-    topCard.type === CardType.NUMBER &&
-    card.value === topCard.value
-  ) {
-    return true;
-  }
-
-  // Match by type (for action cards: Skip on Skip, Reverse on Reverse, etc.)
-  if (
-    card.type !== CardType.NUMBER &&
-    card.type === topCard.type
-  ) {
-    return true;
-  }
-
-  return false;
-}

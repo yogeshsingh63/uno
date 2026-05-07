@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Pressable, Modal, ScrollView } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { Colors } from '../../constants/colors';
-import { PlayerGameState } from '../../../../packages/shared/src/types';
+import { PlayerGameState } from '@uno/shared';
 
 interface EndRoundModalProps {
   visible: boolean;
