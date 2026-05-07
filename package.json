@@ -1,0 +1,16 @@
+{
+  "name": "uno-multiplayer",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "server:dev": "cd apps/server && npm run dev",
+    "server:build": "cd apps/server && npm run build",
+    "mobile:start": "cd apps/mobile && npx expo start",
+    "mobile:ios": "cd apps/mobile && npx expo start --ios",
+    "mobile:android": "cd apps/mobile && npx expo start --android"
+  }
+}
