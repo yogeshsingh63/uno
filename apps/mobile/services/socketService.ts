@@ -1,6 +1,52 @@
 import { io, Socket } from 'socket.io-client';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL || 'http://localhost:3001';
+/**
+ * Auto-detect the server URL for mobile:
+ * - On web: localhost works fine
+ * - On mobile (Expo Go): extract the dev machine's IP from Expo's debuggerHost
+ *   which looks like "192.168.x.x:8081", then use port 3001 on that IP
+ */
+function getServerUrl(): string {
+  // 1. Explicit env var always wins
+  const envUrl = process.env.EXPO_PUBLIC_SERVER_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+
+  // 2. On web, localhost is fine
+  if (Platform.OS === 'web') {
+    return envUrl || 'http://localhost:3001';
+  }
+
+  // 3. On mobile, extract IP from Expo's debuggerHost
+  try {
+    const debuggerHost =
+      (Constants.expoGoConfig as any)?.debuggerHost ||
+      (Constants.manifest2?.extra?.expoGo?.debuggerHost) ||
+      (Constants as any)?.manifest?.debuggerHost;
+
+    if (debuggerHost) {
+      const ip = debuggerHost.split(':')[0];
+      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+        console.log(`[Socket] Auto-detected server IP: ${ip}`);
+        return `http://${ip}:3001`;
+      }
+    }
+  } catch (e) {
+    console.warn('[Socket] Could not auto-detect IP:', e);
+  }
+
+  // 4. Fallback: try the env url or Android emulator special IP
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:3001'; // Android emulator → host machine
+  }
+
+  return envUrl || 'http://localhost:3001';
+}
+
+const SERVER_URL = getServerUrl();
 
 class SocketService {
   private socket: Socket | null = null;

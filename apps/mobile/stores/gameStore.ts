@@ -1,43 +1,62 @@
 import { create } from 'zustand';
 import {
   Card, CardColor, PublicGameState, RoomState, RoomStatus,
-  GamePhase, PlayerGameState,
+  GamePhase, TurnState, PlayerGameState, RoomSettings,
 } from '@uno/shared';
 
-interface GameStore {
-  // Connection
-  isConnected: boolean;
-  setConnected: (connected: boolean) => void;
-
-  // Room
+// ---- Game Slice ----
+interface GameSlice {
+  gameState: PublicGameState | null;
   roomCode: string | null;
   roomState: RoomState | null;
+  isConnected: boolean;
+
+  setConnected: (connected: boolean) => void;
   setRoomCode: (code: string | null) => void;
   setRoomState: (state: RoomState | null) => void;
+  setGameState: (state: PublicGameState) => void;
+}
 
-  // Game
-  gameState: PublicGameState | null;
+// ---- Hand Slice ----
+interface HandSlice {
   myHand: Card[];
-  isMyTurn: boolean;
+  drawnCard: Card | null;
+  canPlayDrawnCard: boolean;
   canCallUno: boolean;
+
+  setMyHand: (hand: Card[]) => void;
+  setDrawnCard: (card: Card | null, canPlay: boolean) => void;
+}
+
+// ---- UI Slice ----
+interface Toast {
+  id: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error' | 'uno';
+  duration?: number;
+}
+
+interface UISlice {
+  isMyTurn: boolean;
   showColorPicker: boolean;
   showChallengeModal: boolean;
   showEndRoundModal: boolean;
   showFinalWinnerModal: boolean;
-  drawnCard: Card | null;
-  canPlayDrawnCard: boolean;
+  toasts: Toast[];
+  emojiReactions: { playerId: string; emoji: string; id: string }[];
 
-  // Actions
-  setGameState: (state: PublicGameState) => void;
-  setMyHand: (hand: Card[]) => void;
   setIsMyTurn: (isMyTurn: boolean) => void;
   setShowColorPicker: (show: boolean) => void;
   setShowChallengeModal: (show: boolean) => void;
   setShowEndRoundModal: (show: boolean) => void;
   setShowFinalWinnerModal: (show: boolean) => void;
-  setDrawnCard: (card: Card | null, canPlay: boolean) => void;
+  addToast: (toast: Omit<Toast, 'id'>) => void;
+  removeToast: (id: string) => void;
+  addEmojiReaction: (playerId: string, emoji: string) => void;
+}
 
-  // Round/Game end data
+// ---- Round/Game End Slice ----
+interface EndSlice {
   roundWinnerId: string | null;
   roundWinnerName: string | null;
   cumulativeScores: Record<string, number>;
@@ -47,44 +66,81 @@ interface GameStore {
 
   setRoundEnd: (winnerId: string, winnerName: string, scores: Record<string, number>) => void;
   setGameEnd: (winnerId: string, winnerName: string, scores: Record<string, number>) => void;
-
-  // Reset
-  resetGame: () => void;
-  resetAll: () => void;
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  isConnected: false,
-  setConnected: (connected) => set({ isConnected: connected }),
+// ---- Combined Store ----
+type GameStore = GameSlice & HandSlice & UISlice & EndSlice & {
+  resetGame: () => void;
+  resetAll: () => void;
+};
 
+let toastCounter = 0;
+
+export const useGameStore = create<GameStore>((set, get) => ({
+  // ---- Game Slice ----
+  isConnected: false,
   roomCode: null,
   roomState: null,
+  gameState: null,
+
+  setConnected: (connected) => set({ isConnected: connected }),
   setRoomCode: (code) => set({ roomCode: code }),
   setRoomState: (state) => set({ roomState: state }),
+  setGameState: (state) => set({ gameState: state }),
 
-  gameState: null,
+  // ---- Hand Slice ----
   myHand: [],
-  isMyTurn: false,
+  drawnCard: null,
+  canPlayDrawnCard: false,
   canCallUno: false,
+
+  setMyHand: (hand) => set({
+    myHand: hand,
+    canCallUno: hand.length === 2,
+  }),
+  setDrawnCard: (card, canPlay) => set({ drawnCard: card, canPlayDrawnCard: canPlay }),
+
+  // ---- UI Slice ----
+  isMyTurn: false,
   showColorPicker: false,
   showChallengeModal: false,
   showEndRoundModal: false,
   showFinalWinnerModal: false,
-  drawnCard: null,
-  canPlayDrawnCard: false,
+  toasts: [],
+  emojiReactions: [],
 
-  setGameState: (state) => set({ gameState: state }),
-  setMyHand: (hand) => set((prev) => {
-    const canCallUno = hand.length === 2; // about to play down to 1
-    return { myHand: hand, canCallUno };
-  }),
   setIsMyTurn: (isMyTurn) => set({ isMyTurn }),
   setShowColorPicker: (show) => set({ showColorPicker: show }),
   setShowChallengeModal: (show) => set({ showChallengeModal: show }),
   setShowEndRoundModal: (show) => set({ showEndRoundModal: show }),
   setShowFinalWinnerModal: (show) => set({ showFinalWinnerModal: show }),
-  setDrawnCard: (card, canPlay) => set({ drawnCard: card, canPlayDrawnCard: canPlay }),
 
+  addToast: (toast) => {
+    const id = `toast-${++toastCounter}`;
+    set((state) => ({
+      toasts: [...state.toasts.slice(-1), { ...toast, id }], // Max 2 toasts
+    }));
+    // Auto-dismiss
+    setTimeout(() => {
+      set((state) => ({ toasts: state.toasts.filter(t => t.id !== id) }));
+    }, toast.duration || 2500);
+  },
+  removeToast: (id) => set((state) => ({
+    toasts: state.toasts.filter(t => t.id !== id),
+  })),
+  addEmojiReaction: (playerId, emoji) => {
+    const id = `emoji-${++toastCounter}`;
+    set((state) => ({
+      emojiReactions: [...state.emojiReactions, { playerId, emoji, id }],
+    }));
+    setTimeout(() => {
+      set((state) => ({
+        emojiReactions: state.emojiReactions.filter(e => e.id !== id),
+      }));
+    }, 1500);
+  },
+
+  // ---- End Slice ----
   roundWinnerId: null,
   roundWinnerName: null,
   cumulativeScores: {},
@@ -98,7 +154,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     cumulativeScores: scores,
     showEndRoundModal: true,
   }),
-
   setGameEnd: (winnerId, winnerName, scores) => set({
     gameWinnerId: winnerId,
     gameWinnerName: winnerName,
@@ -106,6 +161,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     showFinalWinnerModal: true,
   }),
 
+  // ---- Resets ----
   resetGame: () => set({
     gameState: null,
     myHand: [],
@@ -121,6 +177,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     roundWinnerName: null,
     gameWinnerId: null,
     gameWinnerName: null,
+    toasts: [],
+    emojiReactions: [],
   }),
 
   resetAll: () => set({
@@ -143,5 +201,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameWinnerId: null,
     gameWinnerName: null,
     finalScores: {},
+    toasts: [],
+    emojiReactions: [],
   }),
 }));

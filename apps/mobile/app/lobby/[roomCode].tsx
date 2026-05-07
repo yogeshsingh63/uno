@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, Text, Pressable, FlatList, Share } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, Pressable, FlatList, Share, Switch, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,14 +7,14 @@ import { Colors } from '../../constants/colors';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useGameSocket } from '../../hooks/useGameSocket';
-import { PlayerInfo } from '@uno/shared';
+import { PlayerInfo, RoomSettings } from '@uno/shared';
 
 export default function LobbyScreen() {
   const { roomCode } = useLocalSearchParams<{ roomCode: string }>();
   const { roomState } = useGameStore();
   const { playerId } = usePlayerStore();
-  const { toggleReady, startGame, addBot, leaveRoom } = useGameSocket();
-
+  const { toggleReady, startGame, addBot, leaveRoom, updateSettings } = useGameSocket();
+  const [showSettings, setShowSettings] = useState(false);
   const isHost = roomState?.hostId === playerId;
   const allReady = roomState?.players?.every(p => p.isReady || p.isHost) && (roomState?.players?.length ?? 0) >= 2;
 
@@ -57,6 +57,61 @@ export default function LobbyScreen() {
         keyExtractor={(item) => item.id}
         style={styles.playerList}
       />
+
+      {/* Settings Panel (host only) */}
+      {isHost && (
+        <View style={styles.settingsSection}>
+          <Pressable onPress={() => setShowSettings(!showSettings)} style={styles.settingsToggle}>
+            <Text style={styles.settingsToggleText}>⚙️ House Rules {showSettings ? '▲' : '▼'}</Text>
+          </Pressable>
+          {showSettings && roomState?.settings && (
+            <View style={styles.settingsPanel}>
+              {[
+                { key: 'stacking' as const, label: 'Draw Two Stacking', desc: 'Stack +2 on +2' },
+                { key: 'sevenO' as const, label: 'Seven-O', desc: '7=swap, 0=rotate' },
+                { key: 'jumpIn' as const, label: 'Jump-In', desc: 'Play same card out of turn' },
+                { key: 'forcePlay' as const, label: 'Force Play', desc: 'Must play drawn card if able' },
+                { key: 'alternateScoring' as const, label: 'Alternate Scoring', desc: 'Lowest score wins' },
+              ].map(({ key, label, desc }) => (
+                <View key={key} style={styles.settingRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.settingLabel}>{label}</Text>
+                    <Text style={styles.settingDesc}>{desc}</Text>
+                  </View>
+                  <Switch
+                    value={roomState.settings[key] as boolean}
+                    onValueChange={(val) => updateSettings({ [key]: val })}
+                    trackColor={{ false: Colors.surfaceLight, true: Colors.green }}
+                    thumbColor={Colors.white}
+                  />
+                </View>
+              ))}
+              <View style={styles.settingRow}>
+                <Text style={[styles.settingLabel, { flex: 1 }]}>Score Target</Text>
+                <View style={styles.scoreTargetRow}>
+                  {[200, 300, 500, 999].map(val => (
+                    <Pressable
+                      key={val}
+                      style={[
+                        styles.scoreTargetBtn,
+                        roomState.settings.scoreTarget === val && styles.scoreTargetActive,
+                      ]}
+                      onPress={() => updateSettings({ scoreTarget: val })}
+                    >
+                      <Text style={[
+                        styles.scoreTargetText,
+                        roomState.settings.scoreTarget === val && styles.scoreTargetTextActive,
+                      ]}>
+                        {val === 999 ? '∞' : val}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* Actions */}
       <View style={styles.actions}>
@@ -135,4 +190,28 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.surfaceBorder,
   },
   leaveButtonText: { color: Colors.error, fontSize: 14, fontWeight: '700' },
+  settingsSection: { marginBottom: 10 },
+  settingsToggle: {
+    backgroundColor: Colors.surface, borderRadius: 12, padding: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.surfaceBorder,
+  },
+  settingsToggleText: { color: Colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  settingsPanel: {
+    backgroundColor: Colors.surface, borderRadius: 12, padding: 12, marginTop: 6,
+    borderWidth: 1, borderColor: Colors.surfaceBorder,
+  },
+  settingRow: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 8,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  settingLabel: { color: Colors.textPrimary, fontSize: 13, fontWeight: '600' },
+  settingDesc: { color: Colors.textMuted, fontSize: 10, marginTop: 1 },
+  scoreTargetRow: { flexDirection: 'row', gap: 6 },
+  scoreTargetBtn: {
+    borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6,
+    backgroundColor: Colors.surfaceLight, borderWidth: 1, borderColor: Colors.surfaceBorder,
+  },
+  scoreTargetActive: { backgroundColor: Colors.blue, borderColor: Colors.blue },
+  scoreTargetText: { color: Colors.textMuted, fontSize: 12, fontWeight: '700' },
+  scoreTargetTextActive: { color: Colors.white },
 });

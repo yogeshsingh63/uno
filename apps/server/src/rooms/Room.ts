@@ -1,4 +1,8 @@
-import { RoomState, RoomStatus, PlayerInfo } from '@uno/shared';
+// ============================================================
+// Room — Room state management with settings
+// ============================================================
+
+import { RoomState, RoomStatus, RoomSettings, DEFAULT_ROOM_SETTINGS } from '@uno/shared';
 import { Player } from '../game/Player';
 import { GameEngine } from '../game/GameEngine';
 
@@ -10,6 +14,7 @@ export class Room {
   public maxPlayers: number;
   public minPlayers: number;
   public game: GameEngine | null;
+  public settings: RoomSettings;
   public createdAt: Date;
 
   constructor(code: string, host: Player) {
@@ -20,6 +25,7 @@ export class Room {
     this.maxPlayers = 10;
     this.minPlayers = 2;
     this.game = null;
+    this.settings = { ...DEFAULT_ROOM_SETTINGS };
     this.createdAt = new Date();
   }
 
@@ -50,9 +56,13 @@ export class Room {
     return this.players.length >= this.minPlayers && this.players.every(p => p.isReady || p.isHost);
   }
 
+  updateSettings(partial: Partial<RoomSettings>): void {
+    this.settings = { ...this.settings, ...partial };
+  }
+
   startGame(): GameEngine {
     this.status = RoomStatus.PLAYING;
-    this.game = new GameEngine(this.players);
+    this.game = new GameEngine(this.players, this.settings);
     this.game.startNewRound();
     return this.game;
   }
@@ -73,11 +83,13 @@ export class Room {
         isReady: p.isReady,
         isConnected: p.isConnected,
         isHost: p.id === this.hostId,
+        isBot: p.isBot,
       })),
       hostId: this.hostId,
       status: this.status,
       maxPlayers: this.maxPlayers,
       minPlayers: this.minPlayers,
+      settings: this.settings,
     };
   }
 }

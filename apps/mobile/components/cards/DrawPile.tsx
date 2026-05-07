@@ -1,9 +1,15 @@
+// ============================================================
+// DrawPile — Card-back stack + click to draw (Section 3)
+// ============================================================
 import React from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withRepeat, withSequence,
+  withTiming, withSpring,
+} from 'react-native-reanimated';
+import CardBack from './CardBack';
+import { CARD_WIDTH, CARD_HEIGHT } from '../../constants/cardDimensions';
 import { Colors } from '../../constants/colors';
-import { CARD_WIDTH, CARD_HEIGHT, CARD_BORDER_RADIUS } from '../../constants/cardData';
 import { SPRING_BOUNCE } from '../../constants/animations';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -25,7 +31,7 @@ export default function DrawPile({ count, isMyTurn, onDraw }: DrawPileProps) {
         -1, true
       );
     } else {
-      glowOpacity.value = withTiming(0);
+      glowOpacity.value = withTiming(0, { duration: 300 });
     }
   }, [isMyTurn]);
 
@@ -48,16 +54,17 @@ export default function DrawPile({ count, isMyTurn, onDraw }: DrawPileProps) {
   return (
     <AnimatedPressable onPress={handlePress} style={[animatedStyle]}>
       <Animated.View style={[styles.container, glowStyle]}>
-        {/* Stacked card backs for depth */}
+        {/* Stacked card backs for 3D depth */}
         {[2, 1, 0].map((offset) => (
-          <View key={offset} style={[styles.stackedCard, { top: -offset * 2, left: offset * 1.5 }]}>
-            <LinearGradient colors={['#2a2a4a', '#1a1a3e']} style={styles.cardBack}>
-              {offset === 0 && (
-                <View style={styles.cardBackInner}>
-                  <Text style={styles.cardBackText}>UNO</Text>
-                </View>
-              )}
-            </LinearGradient>
+          <View key={offset} style={[styles.stackedCard, {
+            top: -offset * 2,
+            left: offset * 1.5,
+          }]}>
+            <CardBack
+              width={CARD_WIDTH}
+              height={CARD_HEIGHT}
+              borderRadius={10}
+            />
           </View>
         ))}
 
@@ -65,6 +72,13 @@ export default function DrawPile({ count, isMyTurn, onDraw }: DrawPileProps) {
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{count}</Text>
         </View>
+
+        {/* Draw label when it's your turn */}
+        {isMyTurn && (
+          <View style={styles.drawLabel}>
+            <Text style={styles.drawText}>DRAW</Text>
+          </View>
+        )}
       </Animated.View>
     </AnimatedPressable>
   );
@@ -86,50 +100,37 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
   },
-  cardBack: {
-    width: '100%',
-    height: '100%',
-    borderRadius: CARD_BORDER_RADIUS,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
-  cardBackInner: {
-    width: '75%',
-    height: '75%',
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,45,85,0.1)',
-  },
-  cardBackText: {
-    color: Colors.red,
-    fontWeight: '900',
-    fontSize: 16,
-    letterSpacing: 2,
-    textShadowColor: Colors.redGlow,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
-  },
   countBadge: {
     position: 'absolute',
-    bottom: -6,
-    right: -6,
+    bottom: -8,
+    right: -8,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
-    width: 24,
-    height: 24,
+    borderRadius: 14,
+    width: 28,
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.surfaceBorder,
+    zIndex: 10,
   },
   countText: {
     color: Colors.textPrimary,
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
+  },
+  drawLabel: {
+    position: 'absolute',
+    bottom: -24,
+    backgroundColor: 'rgba(100,210,255,0.15)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  drawText: {
+    color: Colors.neonCyan,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 2,
   },
 });

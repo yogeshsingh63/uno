@@ -37,9 +37,9 @@ export const Colors = {
 };
 
 export const UNO_CARD_COLORS: Record<string, { primary: string; dark: string; glow: string }> = {
-  RED: { primary: Colors.red, dark: Colors.redDark, glow: Colors.redGlow },
-  YELLOW: { primary: Colors.yellow, dark: Colors.yellowDark, glow: Colors.yellowGlow },
-  GREEN: { primary: Colors.green, dark: Colors.greenDark, glow: Colors.greenGlow },
-  BLUE: { primary: Colors.blue, dark: Colors.blueDark, glow: Colors.blueGlow },
-  WILD: { primary: '#8e8ea0', dark: '#555570', glow: 'rgba(142,142,160,0.4)' },
+  RED: { primary: '#E53935', dark: '#C62828', glow: 'rgba(229,57,53,0.4)' },
+  YELLOW: { primary: '#FFD600', dark: '#F9A825', glow: 'rgba(255,214,0,0.4)' },
+  GREEN: { primary: '#43A047', dark: '#2E7D32', glow: 'rgba(67,160,71,0.4)' },
+  BLUE: { primary: '#1E88E5', dark: '#1565C0', glow: 'rgba(30,136,229,0.4)' },
+  WILD: { primary: '#1C1C1E', dark: '#111113', glow: 'rgba(142,142,160,0.4)' },
 };

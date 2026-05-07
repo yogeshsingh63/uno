@@ -1,31 +1,33 @@
 // ============================================================
-// Card — Card interfaces and deck factory
+// Card — Card factory and deck builder (Section 1)
 // ============================================================
 
-import { Card, CardColor, CardType } from '@uno/shared';
-import { v4 as uuidv4 } from 'uuid';
+import { Card, CardColor, CardType, getCardPointValue } from '@uno/shared';
+import * as crypto from 'crypto';
 
-/**
- * Create a single card instance
- */
+let cardCounter = 0;
+
+/** Generate a unique card ID using crypto */
+function generateCardId(): string {
+  return `card-${Date.now().toString(36)}-${(cardCounter++).toString(36)}-${crypto.randomBytes(3).toString('hex')}`;
+}
+
+/** Create a single card instance with pointValue */
 export function createCard(color: CardColor, type: CardType, value?: number): Card {
   return {
-    id: uuidv4(),
+    id: generateCardId(),
     color,
     type,
     value,
+    pointValue: getCardPointValue(type, value),
   };
 }
 
 /**
- * Generate a full 108-card UNO deck per official rules:
- * - 19 cards per color (one 0, two 1–9) = 76 number cards
- * - 2 Skip per color = 8
- * - 2 Reverse per color = 8
- * - 2 Draw Two per color = 8
- * - 4 Wild cards
- * - 4 Wild Draw Four cards
- * Total = 108
+ * Generate a full 108-card UNO deck per official rules (Section 1):
+ * NUMBER (76): 4 colors × (1 zero + 2 each 1–9) = 76
+ * ACTION (24): 4 colors × (2 Skip + 2 Reverse + 2 Draw Two) = 24
+ * WILD (8):   4× Wild + 4× Wild Draw Four = 8
  */
 export function createFullDeck(): Card[] {
   const deck: Card[] = [];
@@ -41,15 +43,11 @@ export function createFullDeck(): Card[] {
       deck.push(createCard(color, CardType.NUMBER, num));
     }
 
-    // Two Skip per color
+    // Two of each action card per color
     deck.push(createCard(color, CardType.SKIP));
     deck.push(createCard(color, CardType.SKIP));
-
-    // Two Reverse per color
     deck.push(createCard(color, CardType.REVERSE));
     deck.push(createCard(color, CardType.REVERSE));
-
-    // Two Draw Two per color
     deck.push(createCard(color, CardType.DRAW_TWO));
     deck.push(createCard(color, CardType.DRAW_TWO));
   }
@@ -67,43 +65,7 @@ export function createFullDeck(): Card[] {
   return deck;
 }
 
-/**
- * Get the point value of a card for scoring
- */
+/** Get the point value of a card for scoring */
 export function getCardPoints(card: Card): number {
-  switch (card.type) {
-    case CardType.NUMBER:
-      return card.value ?? 0;
-    case CardType.SKIP:
-    case CardType.REVERSE:
-    case CardType.DRAW_TWO:
-      return 20;
-    case CardType.WILD:
-    case CardType.WILD_DRAW_FOUR:
-      return 50;
-    default:
-      return 0;
-  }
-}
-
-/**
- * Get a display-friendly label for a card
- */
-export function getCardLabel(card: Card): string {
-  switch (card.type) {
-    case CardType.NUMBER:
-      return `${card.color} ${card.value}`;
-    case CardType.SKIP:
-      return `${card.color} SKIP`;
-    case CardType.REVERSE:
-      return `${card.color} REVERSE`;
-    case CardType.DRAW_TWO:
-      return `${card.color} +2`;
-    case CardType.WILD:
-      return 'WILD';
-    case CardType.WILD_DRAW_FOUR:
-      return 'WILD +4';
-    default:
-      return 'UNKNOWN';
-  }
+  return card.pointValue;
 }

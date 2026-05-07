@@ -30,7 +30,8 @@ const io = new Server(server, {
 
 registerSocketHandlers(io);
 
-server.listen(PORT, () => {
-  console.log(`🃏 UNO Server running on port ${PORT}`);
+server.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`🃏 UNO Server running on port ${PORT} (0.0.0.0)`);
   console.log(`   Health: http://localhost:${PORT}/health`);
+  console.log(`   For mobile, use your LAN IP:${PORT}`);
 });
