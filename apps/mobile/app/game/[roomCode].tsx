@@ -161,7 +161,7 @@ export default function GameScreen() {
 
       {/* Turn indicator */}
       {isMyTurn && (
-        <View style={styles.turnBanner}>
+        <View style={styles.turnBanner} pointerEvents="none">
           <Text style={styles.turnText}>Your Turn!</Text>
         </View>
       )}
