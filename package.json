@@ -7,6 +7,7 @@
     "server:build": "cd apps/server && npm run build",
     "mobile:start": "cd apps/mobile && npx expo start",
     "mobile:ios": "cd apps/mobile && npx expo start --ios",
-    "mobile:android": "cd apps/mobile && npx expo start --android"
+    "mobile:android": "cd apps/mobile && npx expo start --android",
+    "mobile:web": "cd apps/mobile && npx expo start --web"
   }
 }

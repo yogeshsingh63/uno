@@ -13,10 +13,20 @@ export default function LobbyScreen() {
   const { roomCode } = useLocalSearchParams<{ roomCode: string }>();
   const { roomState } = useGameStore();
   const { playerId } = usePlayerStore();
-  const { toggleReady, startGame, addBot, leaveRoom, updateSettings } = useGameSocket();
+  const { toggleReady, startGame, addBot, leaveRoom, updateSettings, reconnectRoom } = useGameSocket();
   const [showSettings, setShowSettings] = useState(false);
   const isHost = roomState?.hostId === playerId;
   const allReady = roomState?.players?.every(p => p.isReady || p.isHost) && (roomState?.players?.length ?? 0) >= 2;
+
+  // Auto-reconnect on web page refresh
+  React.useEffect(() => {
+    if (!roomState && roomCode && playerId) {
+      const timer = setTimeout(() => {
+        reconnectRoom(roomCode as string);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [roomState, roomCode, playerId, reconnectRoom]);
 
   const handleShare = async () => {
     await Share.share({ message: `Join my UNO game! Room code: ${roomCode}` });

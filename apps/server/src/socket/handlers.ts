@@ -121,8 +121,9 @@ function handleBotTurn(io: Server, roomCode: string) {
 
     const result = room.game.playCard(currentPlayer.id, action.cardId!, chosenColor);
     if (result.success) {
-      // If game needs color choice, bot picks immediately
-      if (room.game.turnState === TurnState.AWAITING_COLOR) {
+      // playCard() mutates turnState — re-read it to check if color choice is needed
+      const currentTurnState = room.game.turnState as string;
+      if (currentTurnState === TurnState.AWAITING_COLOR) {
         const color = bot.chooseColor();
         room.game.chooseColor(currentPlayer.id, color);
       }

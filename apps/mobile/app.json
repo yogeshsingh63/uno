@@ -10,7 +10,6 @@
     "splash": {
       "backgroundColor": "#0d0d1a"
     },
-    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.uno.multiplayer"
@@ -19,8 +18,11 @@
       "adaptiveIcon": {
         "backgroundColor": "#0d0d1a"
       },
-      "package": "com.uno.multiplayer",
-      "usesCleartextTraffic": true
+      "package": "com.uno.multiplayer"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-router",

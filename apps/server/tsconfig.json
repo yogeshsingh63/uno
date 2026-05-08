@@ -8,16 +8,14 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "../..",
     "resolveJsonModule": true,
     "declaration": true,
     "paths": {
       "@uno/shared": ["../../packages/shared/src"]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["src/**/*"],
-  "references": [
-    { "path": "../../packages/shared" }
-  ]
+  "include": ["src/**/*", "../../packages/shared/src/**/*"]
 }
