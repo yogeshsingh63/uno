@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 /**
  * Auto-detect the server URL for mobile:
  * - On web: localhost works fine
- * - On mobile (Expo Go): extract the dev machine's IP from Expo's debuggerHost
+ * - On mobile (Expo Go): extract the dev machine's IP from Expo's hostUri
  *   which looks like "192.168.x.x:8081", then use port 3001 on that IP
  */
 function getServerUrl(): string {
@@ -20,15 +20,16 @@ function getServerUrl(): string {
     return envUrl || 'http://localhost:3001';
   }
 
-  // 3. On mobile, extract IP from Expo's debuggerHost
+  // 3. On mobile, extract IP from Expo's hostUri (modern SDK 54+ API)
   try {
-    const debuggerHost =
-      (Constants.expoGoConfig as any)?.debuggerHost ||
-      (Constants.manifest2?.extra?.expoGo?.debuggerHost) ||
-      (Constants as any)?.manifest?.debuggerHost;
+    const hostUri =
+      Constants.expoConfig?.hostUri ||
+      (Constants as any).expoGoConfig?.debuggerHost ||
+      (Constants as any).manifest2?.extra?.expoGo?.debuggerHost ||
+      (Constants as any).manifest?.debuggerHost;
 
-    if (debuggerHost) {
-      const ip = debuggerHost.split(':')[0];
+    if (hostUri) {
+      const ip = hostUri.split(':')[0];
       if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
         console.log(`[Socket] Auto-detected server IP: ${ip}`);
         return `http://${ip}:3001`;
