@@ -280,10 +280,17 @@ export function useGameSocket() {
     router.replace('/home');
   }, []);
 
+  const reconnectRoom = useCallback((code: string) => {
+    const pId = playerIdRef.current;
+    if (code && pId) {
+      socketService.emit(CLIENT_EVENTS.RECONNECT_ROOM, { roomCode: code, playerId: pId });
+    }
+  }, []);
+
   return {
     createRoom, joinRoom, toggleReady, startGame, updateSettings,
     playCard, drawCard, passTurn, playDrawnCard,
     declareUno, callCatch, challengeDrawFour, acceptDrawFour,
-    chooseColor, sendEmoji, addBot, leaveRoom,
+    chooseColor, sendEmoji, addBot, leaveRoom, reconnectRoom,
   };
 }

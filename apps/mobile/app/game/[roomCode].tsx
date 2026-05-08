@@ -34,7 +34,7 @@ export default function GameScreen() {
   const { playerId } = usePlayerStore();
   const {
     playCard, drawCard, playDrawnCard, passTurn, declareUno, callCatch,
-    challengeDrawFour, acceptDrawFour, chooseColor, sendEmoji, leaveRoom,
+    challengeDrawFour, acceptDrawFour, chooseColor, sendEmoji, leaveRoom, reconnectRoom,
   } = useGameSocket();
   const haptics = useHaptics();
 
@@ -73,6 +73,17 @@ export default function GameScreen() {
     haptics.lightTap();
     acceptDrawFour();
   }, [acceptDrawFour, haptics]);
+
+  // Auto-reconnect on web page refresh
+  React.useEffect(() => {
+    if (!gameState && roomCode && playerId) {
+      // Small timeout to ensure socket is connected before emitting
+      const timer = setTimeout(() => {
+        reconnectRoom(roomCode as string);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, roomCode, playerId, reconnectRoom]);
 
   if (!gameState) {
     return (
