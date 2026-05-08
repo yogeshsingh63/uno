@@ -65,11 +65,21 @@ npx expo start
 
 ### 4. Configure Server URL
 
-For physical devices, update the server URL:
+For physical devices (especially on WSL where local IPs are not easily accessible), use SSH reverse tunneling to expose your game server:
 
 ```bash
-# In apps/mobile, create .env:
-EXPO_PUBLIC_SERVER_URL=http://YOUR_LOCAL_IP:3001
+# 1. Start the game server
+cd apps/server && npm run dev
+
+# 2. In a new terminal, tunnel port 3001
+ssh -R 80:localhost:3001 nokey@localhost.run
+
+# 3. Update the mobile app .env with the URL provided by the tunnel
+cd apps/mobile
+echo "EXPO_PUBLIC_SERVER_URL=https://your-tunnel-url.lhr.life" > .env
+
+# 4. Start Expo with tunnel mode
+npx expo start --tunnel --clear
 ```
 
 ## 🎮 How to Play
