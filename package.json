@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "./dev.sh",
     "server:dev": "cd apps/server && npm run dev",
     "server:build": "cd apps/server && npm run build",
     "mobile:start": "cd apps/mobile && npx expo start",

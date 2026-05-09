@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
  * Auto-detect the server URL for mobile:
  * - On web: localhost works fine
  * - On mobile (Expo Go): extract the dev machine's IP from Expo's hostUri
- *   which looks like "192.168.x.x:8081", then use port 3002 on that IP
+ *   which looks like "192.168.x.x:8081", then use port 8082 on that IP
  */
 function getServerUrl(): string {
   // 1. Explicit env var always wins
@@ -17,7 +17,7 @@ function getServerUrl(): string {
 
   // 2. On web, localhost is fine
   if (Platform.OS === 'web') {
-    return envUrl || 'http://localhost:3001';
+    return envUrl || 'http://localhost:8082';
   }
 
   // 3. On mobile, extract IP from Expo's hostUri (modern SDK 54+ API)
@@ -32,7 +32,7 @@ function getServerUrl(): string {
       const ip = hostUri.split(':')[0];
       if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
         console.log(`[Socket] Auto-detected server IP: ${ip}`);
-        return `http://${ip}:3001`;
+        return `http://${ip}:8082`;
       }
     }
   } catch (e) {
@@ -41,10 +41,10 @@ function getServerUrl(): string {
 
   // 4. Fallback: try the env url or Android emulator special IP
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3001'; // Android emulator → host machine
+    return 'http://10.0.2.2:8082'; // Android emulator → host machine
   }
 
-  return envUrl || 'http://localhost:3001';
+  return envUrl || 'http://localhost:8082';
 }
 
 const SERVER_URL = getServerUrl();

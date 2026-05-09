@@ -12,9 +12,9 @@ RUN cd apps/server && npm install
 # Copy source code
 COPY apps/server/ ./apps/server/
 
-EXPOSE 3001
+EXPOSE 8082
 
-ENV PORT=3001
+ENV PORT=8082
 ENV NODE_ENV=development
 
 # Run in dev mode using tsx watch
