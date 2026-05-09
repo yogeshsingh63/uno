@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
  * Auto-detect the server URL for mobile:
  * - On web: localhost works fine
  * - On mobile (Expo Go): extract the dev machine's IP from Expo's hostUri
- *   which looks like "192.168.x.x:8081", then use port 3001 on that IP
+ *   which looks like "192.168.x.x:8081", then use port 3002 on that IP
  */
 function getServerUrl(): string {
   // 1. Explicit env var always wins

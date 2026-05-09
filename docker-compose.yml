@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  uno-server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - CORS_ORIGIN=*
+    volumes:
+      - ./apps/server:/app/apps/server
+      - /app/apps/server/node_modules
+      - ./packages/shared:/app/packages/shared
+
+  uno-mobile:
+    build:
+      context: .
+      dockerfile: apps/mobile/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+    volumes:
+      - ./apps/mobile:/app/apps/mobile
+      - /app/apps/mobile/node_modules
+      - ./packages/shared:/app/packages/shared
