@@ -1,13 +1,13 @@
 // ============================================================
-// NumberCard — Real UNO number card layout
-// Large centered number on a white oval (tilted), with corner
-// indices in white at top-left and bottom-right (inverted).
-// Matches official UNO card design proportions.
+// NumberCard — Official Authentic UNO Number Card
+// Giant white digit in the center with solid black 3D drop shadow,
+// white corner indices (rotated at bottom-right), and 6/9 underline.
+// Exactly matches the official Mattel UNO card design.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import CardShell from './CardShell';
-import { COLOR_GRADIENTS, COLOR_INKS } from '../../constants/cardColors';
+import { COLOR_GRADIENTS } from '../../constants/cardColors';
 
 interface NumberCardProps {
   color: string;   // RED, YELLOW, GREEN, BLUE
@@ -17,86 +17,109 @@ interface NumberCardProps {
   borderRadius?: number;
 }
 
-function NumberCard({ color, value, width, height, borderRadius = 12 }: NumberCardProps) {
+function NumberCard({ color, value, width, height, borderRadius = 10 }: NumberCardProps) {
   const gradient = COLOR_GRADIENTS[color] || COLOR_GRADIENTS.RED;
-  const ink = COLOR_INKS[color] || COLOR_INKS.RED;
   const digit = String(value);
 
-  // Real UNO: large centered oval with the number inside
-  const ovalW = width * 0.72;
-  const ovalH = height * 0.52;
-  const ovalRadius = ovalH / 2;
-  const centerFontSize = height * 0.42;
-  const cornerFontSize = height * 0.14;
+  const centerFontSize = Math.round(height * 0.58);
+  const cornerFontSize = Math.round(height * 0.17);
   const needsUnderline = value === 6 || value === 9;
+  const shadowOffset = Math.max(2, Math.round(width * 0.045));
+  const cornerShadow = Math.max(1, Math.round(width * 0.025));
 
   return (
     <CardShell width={width} height={height} borderRadius={borderRadius} gradient={gradient}>
-      {/* Center white oval with the digit — tilted like real UNO */}
-      <View
-        style={[styles.oval, {
-          width: ovalW,
-          height: ovalH,
-          borderRadius: ovalRadius,
-        }]}
-      >
-        <Text style={[styles.digit, { fontSize: centerFontSize, color: ink }]}>{digit}</Text>
+      {/* Center Giant White Digit with solid Black 3D Shadow */}
+      <View style={styles.centerContainer} pointerEvents="none">
+        <Text
+          style={[styles.centerDigit, {
+            fontSize: centerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: shadowOffset, height: shadowOffset },
+            textShadowRadius: 0,
+          }]}
+        >
+          {digit}
+        </Text>
+
         {needsUnderline && (
-          <View style={[styles.underline, { backgroundColor: ink }]} />
+          <View style={[styles.underlineWrap, { bottom: height * 0.18 }]}>
+            <View style={[styles.underlineShadow, { width: width * 0.32, height: Math.max(3, height * 0.035), top: shadowOffset, left: shadowOffset }]} />
+            <View style={[styles.underline, { width: width * 0.32, height: Math.max(3, height * 0.035) }]} />
+          </View>
         )}
       </View>
 
-      {/* Top-left corner */}
-      <View style={styles.cornerTL}>
-        <Text style={[styles.cornerText, { fontSize: cornerFontSize }]}>{digit}</Text>
+      {/* Top-Left Corner Index */}
+      <View style={[styles.cornerTL, { top: Math.max(3, height * 0.035), left: Math.max(4, width * 0.07) }]} pointerEvents="none">
+        <Text
+          style={[styles.cornerText, {
+            fontSize: cornerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: cornerShadow, height: cornerShadow },
+            textShadowRadius: 0,
+          }]}
+        >
+          {digit}
+        </Text>
       </View>
-      {/* Bottom-right corner (rotated 180°) */}
-      <View style={styles.cornerBR}>
-        <Text style={[styles.cornerText, { fontSize: cornerFontSize }]}>{digit}</Text>
+
+      {/* Bottom-Right Corner Index (Inverted 180°) */}
+      <View style={[styles.cornerBR, { bottom: Math.max(3, height * 0.035), right: Math.max(4, width * 0.07) }]} pointerEvents="none">
+        <Text
+          style={[styles.cornerText, {
+            fontSize: cornerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: cornerShadow, height: cornerShadow },
+            textShadowRadius: 0,
+          }]}
+        >
+          {digit}
+        </Text>
       </View>
     </CardShell>
   );
 }
 
 const styles = StyleSheet.create({
-  oval: {
-    position: 'absolute',
-    backgroundColor: '#FFF5E6',
-    alignItems: 'center',
+  centerContainer: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
-    transform: [{ rotate: '-22deg' }],
-    shadowColor: 'rgba(0,0,0,0.3)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 4,
+    alignItems: 'center',
   },
-  digit: {
+  centerDigit: {
+    color: '#FFFFFF',
     fontWeight: '900',
     fontStyle: 'italic',
-    textShadowColor: 'rgba(0,0,0,0.10)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  underlineWrap: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   underline: {
-    position: 'absolute',
-    bottom: '20%',
-    width: 8,
-    height: 2,
-    borderRadius: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 2,
   },
-  cornerTL: { position: 'absolute', top: 4, left: 6 },
+  underlineShadow: {
+    position: 'absolute',
+    backgroundColor: '#000000',
+    borderRadius: 2,
+  },
+  cornerTL: {
+    position: 'absolute',
+  },
   cornerBR: {
-    position: 'absolute', bottom: 4, right: 6,
+    position: 'absolute',
     transform: [{ rotate: '180deg' }],
   },
   cornerText: {
-    color: '#FFF5E6',
+    color: '#FFFFFF',
     fontWeight: '900',
     fontStyle: 'italic',
-    textShadowColor: 'rgba(0,0,0,0.4)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    includeFontPadding: false,
   },
 });
 

@@ -1,13 +1,12 @@
 // ============================================================
-// WildDrawFourCard — official UNO wild-draw-four design
-// Matte black face with a fan of four colored mini-cards, a
-// background pie, and a +4 label; red pulsing ring while a
-// challenge is pending.
+// WildDrawFourCard — Official Authentic UNO Wild Draw Four (+4) Card
+// Matte black face with diagonal white oval ring, 4 overlapping
+// colored cards (Green, Blue, Red, Yellow) in center with black
+// drop shadows, and "+4" corner indices. Matches official UNO.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import CardShell from './CardShell';
-import ColorPie from './ColorPie';
 import { CARD_COLORS } from '../../constants/cardColors';
 
 interface WildDrawFourCardProps {
@@ -19,20 +18,21 @@ interface WildDrawFourCardProps {
 }
 
 function WildDrawFourCard({
-  width, height, borderRadius = 12, declaredColor, challengePending,
+  width, height, borderRadius = 10, declaredColor, challengePending,
 }: WildDrawFourCardProps) {
-  const miniW = width * 0.24;
-  const miniH = miniW * 1.42;
-  const miniFontSize = miniW * 0.4;
-  const labelFontSize = height * 0.1;
-  const cornerFontSize = height * 0.09;
-  const pieSize = width * 0.5;
+  const miniW = width * 0.23;
+  const miniH = miniW * 1.44;
+  const miniRadius = Math.max(2, miniW * 0.16);
+  const cornerFontSize = Math.round(height * 0.16);
+  const cornerShadow = Math.max(1, Math.round(width * 0.025));
+  const cardShadow = Math.max(2, Math.round(width * 0.038));
 
-  const fan = [
-    { color: CARD_COLORS.RED, rot: '-18deg', tx: -miniW * 0.62, ty: 3 },
-    { color: CARD_COLORS.YELLOW, rot: '-6deg', tx: -miniW * 0.2, ty: 0 },
-    { color: CARD_COLORS.GREEN, rot: '6deg', tx: miniW * 0.2, ty: 0 },
-    { color: CARD_COLORS.BLUE, rot: '18deg', tx: miniW * 0.62, ty: 3 },
+  // 4 Cards staggered cascade: Green (bottom-left) -> Blue -> Red -> Yellow (top-right)
+  const cards = [
+    { color: CARD_COLORS.GREEN,  top: miniH * 0.22,  left: -miniW * 0.65, z: 1 },
+    { color: CARD_COLORS.BLUE,   top: -miniH * 0.18, left: -miniW * 0.24, z: 2 },
+    { color: CARD_COLORS.YELLOW, top: -miniH * 0.38, left: miniW * 0.46,  z: 3 },
+    { color: CARD_COLORS.RED,    top: 0,             left: miniW * 0.10,  z: 4 },
   ];
 
   return (
@@ -40,11 +40,11 @@ function WildDrawFourCard({
       width={width}
       height={height}
       borderRadius={borderRadius}
-      backgroundColor="#1C1C1E"
-      gradient={['#2C2C33', '#141417']}
+      backgroundColor="#111116"
+      gradient={['#1F1F26', '#111116', '#09090D']}
       declaredColor={declaredColor}
     >
-      {/* Challenge pending red glow */}
+      {/* Challenge pending red glow ring */}
       {challengePending && (
         <View style={[styles.challengeGlow, {
           width: width + 8, height: height + 8,
@@ -52,32 +52,96 @@ function WildDrawFourCard({
         }]} />
       )}
 
-      {/* Background pie */}
-      <ColorPie size={pieSize} opacity={0.5} />
-
-      {/* Four-card fan */}
-      <View style={styles.fanContainer}>
-        {fan.map((fc, i) => (
-          <View key={i} style={[styles.miniCard, {
-            width: miniW, height: miniH, borderRadius: Math.max(2, miniW * 0.18),
-            backgroundColor: fc.color,
-            transform: [{ rotate: fc.rot }, { translateX: fc.tx }, { translateY: fc.ty }],
-            zIndex: i + 1,
-          }]}>
-            <Text style={[styles.miniText, { fontSize: miniFontSize }]}>+4</Text>
-          </View>
+      {/* Center 4 Overlapping Colored Cards with Solid Black Drop Shadows */}
+      <View style={styles.centerContainer} pointerEvents="none">
+        {cards.map((c, i) => (
+          <React.Fragment key={i}>
+            {/* Shadow under each mini card */}
+            <View
+              style={[styles.miniCardShadow, {
+                width: miniW,
+                height: miniH,
+                borderRadius: miniRadius,
+                top: c.top + cardShadow,
+                left: c.left + cardShadow,
+                zIndex: c.z,
+              }]}
+            />
+            {/* Colored mini card */}
+            <View
+              style={[styles.miniCard, {
+                width: miniW,
+                height: miniH,
+                borderRadius: miniRadius,
+                backgroundColor: c.color,
+                top: c.top,
+                left: c.left,
+                zIndex: c.z + 1,
+              }]}
+            />
+          </React.Fragment>
         ))}
       </View>
 
-      <Text style={[styles.label, { fontSize: labelFontSize }]}>+4</Text>
+      {/* Top-Left Corner "+4" */}
+      <View style={[styles.cornerTL, { top: Math.max(3, height * 0.035), left: Math.max(4, width * 0.06) }]} pointerEvents="none">
+        <Text
+          style={[styles.cornerText, {
+            fontSize: cornerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: cornerShadow, height: cornerShadow },
+            textShadowRadius: 0,
+          }]}
+        >
+          +4
+        </Text>
+      </View>
 
-      <Text style={[styles.corner, styles.cornerTL, { fontSize: cornerFontSize }]}>+4</Text>
-      <Text style={[styles.corner, styles.cornerBR, { fontSize: cornerFontSize }]}>+4</Text>
+      {/* Bottom-Right Corner "+4" (Inverted 180°) */}
+      <View style={[styles.cornerBR, { bottom: Math.max(3, height * 0.035), right: Math.max(4, width * 0.06) }]} pointerEvents="none">
+        <Text
+          style={[styles.cornerText, {
+            fontSize: cornerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: cornerShadow, height: cornerShadow },
+            textShadowRadius: 0,
+          }]}
+        >
+          +4
+        </Text>
+      </View>
     </CardShell>
   );
 }
 
 const styles = StyleSheet.create({
+  centerContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  miniCard: {
+    position: 'absolute',
+    borderWidth: 1.5,
+    borderColor: '#000000',
+  },
+  miniCardShadow: {
+    position: 'absolute',
+    backgroundColor: '#000000',
+  },
+  cornerTL: {
+    position: 'absolute',
+  },
+  cornerBR: {
+    position: 'absolute',
+    transform: [{ rotate: '180deg' }],
+  },
+  cornerText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontStyle: 'italic',
+    includeFontPadding: false,
+  },
   challengeGlow: {
     position: 'absolute',
     borderWidth: 3,
@@ -85,48 +149,9 @@ const styles = StyleSheet.create({
     shadowColor: '#E53935',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.9,
-    shadowRadius: 26,
-    elevation: 15,
+    shadowRadius: 22,
+    elevation: 14,
   },
-  fanContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
-    marginTop: 2,
-  },
-  miniCard: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.95)',
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.45,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  miniText: { color: '#FFFFFF', fontWeight: '900' },
-  label: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginTop: 18,
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  corner: {
-    position: 'absolute',
-    color: '#FFFFFF',
-    fontWeight: '900',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  cornerTL: { top: 5, left: 7 },
-  cornerBR: { bottom: 5, right: 7, transform: [{ rotate: '180deg' }] },
 });
 
 export default memo(WildDrawFourCard);

@@ -4,7 +4,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import CardShell from './CardShell';
-import ColorPie from './ColorPie';
+import { FourColorOval } from './WildCard';
 
 interface ShuffleHandsCardProps {
   width: number;
@@ -13,63 +13,91 @@ interface ShuffleHandsCardProps {
   declaredColor?: string | null;
 }
 
-function ShuffleHandsCard({ width, height, borderRadius = 12, declaredColor }: ShuffleHandsCardProps) {
-  const pieSize = width * 0.5;
-  const labelFontSize = height * 0.09;
-  const cornerFontSize = height * 0.08;
+function ShuffleHandsCard({ width, height, borderRadius = 10, declaredColor }: ShuffleHandsCardProps) {
+  const centerW = width * 0.72;
+  const centerH = height * 0.52;
+  const cornerFontSize = Math.round(height * 0.16);
+  const cornerShadow = Math.max(1, Math.round(width * 0.025));
 
   return (
     <CardShell
       width={width}
       height={height}
       borderRadius={borderRadius}
-      backgroundColor="#1C1C1E"
-      gradient={['#2C2C33', '#141417']}
+      backgroundColor="#111116"
+      gradient={['#1F1F26', '#111116', '#09090D']}
       declaredColor={declaredColor}
     >
-      <ColorPie size={pieSize} />
-
-      {/* Shuffle icon */}
-      <View style={styles.iconRow}>
-        <Text style={[styles.icon, { fontSize: height * 0.16 }]}>⟳</Text>
+      {/* Center 4-Color Oval with Shuffle Icon on top */}
+      <View style={styles.centerContainer} pointerEvents="none">
+        <FourColorOval width={centerW} height={centerH} borderWidth={Math.max(2, width * 0.035)} />
+        <View style={styles.centerIconWrap}>
+          <Text style={[styles.centerIcon, { fontSize: Math.round(height * 0.32) }]}>⟳</Text>
+        </View>
       </View>
 
-      <Text style={[styles.label, { fontSize: labelFontSize }]}>SHUFFLE</Text>
+      {/* Top-Left Corner */}
+      <View style={[styles.cornerTL, { top: Math.max(3, height * 0.035), left: Math.max(4, width * 0.06) }]} pointerEvents="none">
+        <Text
+          style={[styles.cornerText, {
+            fontSize: cornerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: cornerShadow, height: cornerShadow },
+            textShadowRadius: 0,
+          }]}
+        >
+          ⟳
+        </Text>
+      </View>
 
-      <Text style={[styles.corner, styles.cornerTL, { fontSize: cornerFontSize }]}>⟳</Text>
-      <Text style={[styles.corner, styles.cornerBR, { fontSize: cornerFontSize }]}>⟳</Text>
+      {/* Bottom-Right Corner (Inverted 180°) */}
+      <View style={[styles.cornerBR, { bottom: Math.max(3, height * 0.035), right: Math.max(4, width * 0.06) }]} pointerEvents="none">
+        <Text
+          style={[styles.cornerText, {
+            fontSize: cornerFontSize,
+            textShadowColor: '#000000',
+            textShadowOffset: { width: cornerShadow, height: cornerShadow },
+            textShadowRadius: 0,
+          }]}
+        >
+          ⟳
+        </Text>
+      </View>
     </CardShell>
   );
 }
 
 const styles = StyleSheet.create({
-  iconRow: { marginTop: 2, flexDirection: 'row' },
-  icon: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  centerContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  label: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    letterSpacing: 1,
-    marginTop: 2,
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  corner: {
+  centerIconWrap: {
     position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centerIcon: {
     color: '#FFFFFF',
     fontWeight: '900',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
+    includeFontPadding: false,
   },
-  cornerTL: { top: 5, left: 7 },
-  cornerBR: { bottom: 5, right: 7, transform: [{ rotate: '180deg' }] },
+  cornerTL: {
+    position: 'absolute',
+  },
+  cornerBR: {
+    position: 'absolute',
+    transform: [{ rotate: '180deg' }],
+  },
+  cornerText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    includeFontPadding: false,
+  },
 });
 
 export default memo(ShuffleHandsCard);

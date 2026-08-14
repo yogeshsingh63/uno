@@ -50,15 +50,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   arrow: {
-    fontSize: 28,
-    color: Colors.textSecondary,
-    textShadowColor: Colors.neonPurple,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6,
+    fontSize: 24,
+    color: Colors.metallicGold,
+    textShadowColor: 'rgba(245,184,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   label: {
-    color: Colors.textMuted,
+    color: Colors.textSecondary,
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '800',
+    marginTop: 1,
   },
 });

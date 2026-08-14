@@ -1,48 +1,40 @@
 // ============================================================
-// Card Colors — Rich saturated UNO palette
-// Warm 3-stop gradients for each suit with cream accents.
+// Card Colors — Official Authentic UNO Palette
+// Saturated Red, Yellow, Green, Blue and Deep Black for Wilds.
 // ============================================================
 
 export const CARD_COLORS = {
-  RED: '#E8364B',
-  YELLOW: '#F5B800',
-  GREEN: '#2EBD5E',
-  BLUE: '#2B8BF5',
+  RED: '#D71921',
+  YELLOW: '#F9B200',
+  GREEN: '#279B37',
+  BLUE: '#0066D6',
 } as const;
 
 export const CARD_COLORS_HL = {
-  RED: '#FF6B80',
-  YELLOW: '#FFD54F',
-  GREEN: '#5CE08A',
-  BLUE: '#5EAAFF',
+  RED: '#FF4D55',
+  YELLOW: '#FFCA28',
+  GREEN: '#4CD964',
+  BLUE: '#3399FF',
 } as const;
 
-/** 3-stop suit gradients: light → mid → deep */
+/** Solid / clean gradient for each suit */
 export const COLOR_GRADIENTS: Record<string, [string, string, ...string[]]> = {
-  RED: ['#FF6070', '#E8364B', '#A0182A'],
-  YELLOW: ['#FFD54F', '#F5B800', '#B38600'],
-  GREEN: ['#5CE08A', '#2EBD5E', '#1A7A3B'],
-  BLUE: ['#5EAAFF', '#2B8BF5', '#1A5DB3'],
+  RED: ['#E82028', '#D71921', '#B8141B'],
+  YELLOW: ['#FFC000', '#F9B200', '#D69400'],
+  GREEN: ['#30AB42', '#279B37', '#1D7D2A'],
+  BLUE: ['#1A7AE6', '#0066D6', '#004FB3'],
 };
 
-/** Deep tone per color — used for digit ink on white capsule */
-export const COLOR_INKS: Record<string, string> = {
-  RED: '#8B0D20',
-  YELLOW: '#7A5E00',
-  GREEN: '#105C28',
-  BLUE: '#0E3F80',
-};
-
-export const WILD_BG = '#1A0E12';
-export const CARD_BACK_BG = '#140A0E';
-export const CARD_WHITE = '#FFF5E6';
+export const WILD_BG = '#111116';
+export const CARD_BACK_BG = '#111116';
+export const CARD_WHITE = '#FFFFFF';
 export const CARD_SHADOW = 'rgba(0,0,0,0.55)';
 
 export const COLOR_GLOWS: Record<string, string> = {
-  RED: '#E8364B',
-  YELLOW: '#F5B800',
-  GREEN: '#2EBD5E',
-  BLUE: '#2B8BF5',
+  RED: '#D71921',
+  YELLOW: '#F9B200',
+  GREEN: '#279B37',
+  BLUE: '#0066D6',
 };
 
 export const COLOR_INITIALS: Record<string, string> = {

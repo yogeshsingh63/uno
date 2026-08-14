@@ -1,8 +1,8 @@
 // ============================================================
-// CardShell — Premium physical card chassis
-// Cream-ivory border with rounded corners, subtle inner
-// shadow, gentle specular highlight, and soft drop shadow.
-// Clean, warm, physical feel — like a real premium card.
+// CardShell — Authentic Official UNO Card Chassis
+// Clean white outer border, suit/black color background, and
+// the iconic tilted white oval ellipse ring cutting diagonally.
+// Matches the exact official UNO card visual architecture.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -22,14 +22,20 @@ interface CardShellProps {
 }
 
 function CardShell({
-  width, height, borderRadius = 12,
-  gradient, backgroundColor, borderColor = '#FFF5E6',
-  borderWidth = 3, declaredColor, children,
+  width, height, borderRadius = 10,
+  gradient, backgroundColor, borderColor = '#FFFFFF',
+  borderWidth, declaredColor, children,
 }: CardShellProps) {
-  const base = backgroundColor || '#1A0E12';
+  const base = backgroundColor || '#111116';
   const grad: [string, string, ...string[]] =
     gradient && gradient.length >= 2 ? gradient : [base, base];
   const ringCol = declaredColor ? (CARD_COLORS as any)[declaredColor] : null;
+
+  const actualBorderWidth = borderWidth ?? Math.max(2.5, width * 0.045);
+  const ovalW = width * 1.22;
+  const ovalH = height * 0.62;
+  const ovalRadius = ovalH / 2;
+  const ovalBorderWidth = Math.max(2, width * 0.04);
 
   return (
     <View style={[styles.outerShadow, { width, height, borderRadius }]}>
@@ -47,31 +53,26 @@ function CardShell({
 
       <LinearGradient
         colors={grad}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
         style={[styles.face, {
           width, height, borderRadius,
-          borderColor, borderWidth, backgroundColor: base,
+          borderColor, borderWidth: actualBorderWidth,
+          backgroundColor: base,
         }]}
       >
-        {/* Subtle top specular highlight — warm, not harsh */}
-        <LinearGradient
-          colors={['rgba(255,255,240,0.35)', 'rgba(255,255,240,0.08)', 'rgba(255,255,240,0)']}
-          start={{ x: 0.3, y: 0 }}
-          end={{ x: 0.7, y: 0.5 }}
-          style={StyleSheet.absoluteFill}
+        {/* Iconic UNO Diagonal White Oval Ring Outline */}
+        <View
           pointerEvents="none"
+          style={[styles.diagonalOval, {
+            width: ovalW,
+            height: ovalH,
+            borderRadius: ovalRadius,
+            borderWidth: ovalBorderWidth,
+          }]}
         />
 
-        {/* Bottom vignette for depth */}
-        <LinearGradient
-          colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)']}
-          start={{ x: 0.5, y: 0.55 }}
-          end={{ x: 0.5, y: 1 }}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-        />
-
+        {/* Card Content (centered symbols/digits + corner marks) */}
         {children}
       </LinearGradient>
     </View>
@@ -81,20 +82,28 @@ function CardShell({
 const styles = StyleSheet.create({
   outerShadow: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 5 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowRadius: 8,
+    elevation: 6,
   },
   face: {
     overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  diagonalOval: {
+    position: 'absolute',
+    borderColor: '#FFFFFF',
+    transform: [{ rotate: '-28deg' }],
   },
   glowRing: {
     position: 'absolute',
     borderWidth: 3,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.9,
-    shadowRadius: 22,
+    shadowRadius: 20,
     elevation: 14,
   },
 });

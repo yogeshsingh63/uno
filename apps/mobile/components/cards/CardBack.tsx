@@ -1,7 +1,7 @@
 // ============================================================
-// CardBack — Premium UNO card back
-// Deep crimson-to-black face, cream border, tilted oval
-// with bold UNO wordmark, and warm corner accents.
+// CardBack — Official Authentic UNO Card Back
+// Classic black background with white outer frame, giant tilted
+// oval with the official bold italic "UNO" wordmark.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
@@ -13,59 +13,42 @@ interface CardBackProps {
   borderRadius?: number;
 }
 
-function CardBack({ width, height, borderRadius = 12 }: CardBackProps) {
-  const ovalW = width * 0.70;
-  const ovalH = height * 0.46;
+function CardBack({ width, height, borderRadius = 10 }: CardBackProps) {
+  const ovalW = width * 0.74;
+  const ovalH = height * 0.48;
   const ovalRadius = ovalH / 2;
-  const fontSize = ovalH * 0.46;
-  const dotSize = Math.max(3, width * 0.045);
-  const dotInset = Math.max(7, width * 0.12);
+  const fontSize = Math.round(ovalH * 0.50);
+  const actualBorderWidth = Math.max(2.5, width * 0.045);
 
   return (
-    <View style={[styles.card, { width, height, borderRadius }]}>
+    <View
+      style={[styles.card, {
+        width,
+        height,
+        borderRadius,
+        borderWidth: actualBorderWidth,
+      }]}
+    >
       <LinearGradient
-        colors={['#C41230', '#8B0D20', '#3A0610']}
+        colors={['#1F1F26', '#111116', '#09090D']}
         start={{ x: 0.2, y: 0 }}
         end={{ x: 0.8, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Warm gloss sweep */}
-      <LinearGradient
-        colors={['rgba(255,240,220,0.30)', 'rgba(255,240,220,0.06)', 'rgba(0,0,0,0)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0.7 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
+      {/* Red Center Oval Ring */}
+      <View
+        style={[styles.redOval, {
+          width: ovalW * 1.05,
+          height: ovalH * 1.05,
+          borderRadius: (ovalH * 1.05) / 2,
+        }]}
       />
 
-      {/* Bottom depth */}
-      <LinearGradient
-        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']}
-        start={{ x: 0.5, y: 0.5 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-
-      {/* Cream tilted oval with UNO mark */}
+      {/* White Tilted Center Oval with UNO Mark */}
       <View style={[styles.oval, { width: ovalW, height: ovalH, borderRadius: ovalRadius }]}>
         <Text style={[styles.unoText, { fontSize }]}>UNO</Text>
       </View>
-
-      {/* Corner dots */}
-      {(['tl', 'tr', 'bl', 'br'] as const).map((pos) => (
-        <View
-          key={pos}
-          style={[styles.dot, {
-            width: dotSize, height: dotSize, borderRadius: dotSize / 2,
-            ...(pos === 'tl' ? { top: dotInset, left: dotInset }
-              : pos === 'tr' ? { top: dotInset, right: dotInset }
-              : pos === 'bl' ? { bottom: dotInset, left: dotInset }
-              : { bottom: dotInset, right: dotInset }),
-          }]}
-        />
-      ))}
     </View>
   );
 }
@@ -75,36 +58,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: '#FFF5E6',
+    borderColor: '#FFFFFF',
+    backgroundColor: '#111116',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 5 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  redOval: {
+    position: 'absolute',
+    backgroundColor: '#D71921',
+    transform: [{ rotate: '-28deg' }],
   },
   oval: {
-    backgroundColor: '#FFF5E6',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    transform: [{ rotate: '-25deg' }],
-    shadowColor: 'rgba(0,0,0,0.4)',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
+    transform: [{ rotate: '-28deg' }],
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
     elevation: 4,
   },
   unoText: {
     fontWeight: '900',
     fontStyle: 'italic',
-    color: '#8B0D20',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  dot: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255,245,230,0.7)',
+    color: '#D71921',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1.5, height: 1.5 },
+    textShadowRadius: 1,
+    includeFontPadding: false,
   },
 });
 
