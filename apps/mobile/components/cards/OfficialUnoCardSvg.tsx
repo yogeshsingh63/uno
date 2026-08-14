@@ -91,17 +91,17 @@ function OfficialUnoCardSvg({
 
           {/* Wild center 4-color oval clip */}
           <ClipPath id="wildCenterOval">
-            <Ellipse cx="50" cy="74" rx="28" ry="44" transform="rotate(-27, 50, 74)" />
+            <Ellipse cx="50" cy="74" rx="35" ry="52" transform="rotate(-33, 50, 74)" />
           </ClipPath>
 
           {/* Corner Top-Left Mini 4-color oval clip */}
           <ClipPath id="cornerTLOval">
-            <Ellipse cx="13.5" cy="18" rx="8" ry="12.5" transform="rotate(-27, 13.5, 18)" />
+            <Ellipse cx="23" cy="23" rx="10.5" ry="16" transform="rotate(-33, 23, 23)" />
           </ClipPath>
 
           {/* Corner Bottom-Right Mini 4-color oval clip */}
           <ClipPath id="cornerBROval">
-            <Ellipse cx="86.5" cy="130" rx="8" ry="12.5" transform="rotate(153, 86.5, 130)" />
+            <Ellipse cx="77" cy="125" rx="10.5" ry="16" transform="rotate(147, 77, 125)" />
           </ClipPath>
         </Defs>
 
@@ -343,44 +343,44 @@ function OfficialUnoCardSvg({
           <G>
             {/* Center Giant 4-Color Oval */}
             <G clipPath="url(#wildCenterOval)">
-              {/* Top-Left Quadrant: RED */}
-              <Rect x="0" y="0" width="50" height="74" fill={CARD_COLORS.RED} />
-              {/* Top-Right Quadrant: BLUE */}
-              <Rect x="50" y="0" width="50" height="74" fill={CARD_COLORS.BLUE} />
-              {/* Bottom-Left Quadrant: YELLOW */}
-              <Rect x="0" y="74" width="50" height="74" fill={CARD_COLORS.YELLOW} />
-              {/* Bottom-Right Quadrant: GREEN */}
-              <Rect x="50" y="74" width="50" height="74" fill={CARD_COLORS.GREEN} />
+              {/* Top-Left Sector: RED */}
+              <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#ED3838" />
+              {/* Top-Right Sector: BLUE */}
+              <Path d="M 50 74 L 50 0 L 100 0 L 100 74 Z" fill="#3B4BF5" />
+              {/* Middle-Left Sector: YELLOW */}
+              <Path d="M 50 74 L 0 74 L 0 148 L 26 148 Z" fill="#FFA000" />
+              {/* Bottom & Bottom-Right Sector: GREEN */}
+              <Path d="M 50 74 L 100 74 L 100 148 L 26 148 Z" fill="#00A825" />
             </G>
             {/* White Outline Border around 4-Color Oval */}
             <Ellipse
               cx="50"
               cy="74"
-              rx="28"
-              ry="44"
+              rx="35"
+              ry="52"
               fill="none"
               stroke="#FFFFFF"
               strokeWidth="4"
-              transform="rotate(-27, 50, 74)"
+              transform="rotate(-33, 50, 74)"
             />
 
             {/* Corner Top-Left Mini 4-Color Oval */}
             <G clipPath="url(#cornerTLOval)">
-              <Rect x="0" y="0" width="13.5" height="18" fill={CARD_COLORS.RED} />
-              <Rect x="13.5" y="0" width="13.5" height="18" fill={CARD_COLORS.BLUE} />
-              <Rect x="0" y="18" width="13.5" height="18" fill={CARD_COLORS.YELLOW} />
-              <Rect x="13.5" y="18" width="13.5" height="18" fill={CARD_COLORS.GREEN} />
+              <Path d="M 23 23 L 23 0 L 0 0 L 0 23 Z" fill="#ED3838" />
+              <Path d="M 23 23 L 23 0 L 50 0 L 50 23 Z" fill="#3B4BF5" />
+              <Path d="M 23 23 L 0 23 L 0 50 L 12 50 Z" fill="#FFA000" />
+              <Path d="M 23 23 L 50 23 L 50 50 L 12 50 Z" fill="#00A825" />
             </G>
-            <Ellipse cx="13.5" cy="18" rx="8" ry="12.5" fill="none" stroke="#FFFFFF" strokeWidth="2" transform="rotate(-27, 13.5, 18)" />
+            <Ellipse cx="23" cy="23" rx="10.5" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2.2" transform="rotate(-33, 23, 23)" />
 
             {/* Corner Bottom-Right Mini 4-Color Oval (Rotated 180°) */}
             <G clipPath="url(#cornerBROval)">
-              <Rect x="73" y="112" width="13.5" height="18" fill={CARD_COLORS.GREEN} />
-              <Rect x="86.5" y="112" width="13.5" height="18" fill={CARD_COLORS.YELLOW} />
-              <Rect x="73" y="130" width="13.5" height="18" fill={CARD_COLORS.BLUE} />
-              <Rect x="86.5" y="130" width="13.5" height="18" fill={CARD_COLORS.RED} />
+              <Path d="M 77 125 L 77 148 L 100 148 L 100 125 Z" fill="#ED3838" />
+              <Path d="M 77 125 L 77 148 L 50 148 L 50 125 Z" fill="#3B4BF5" />
+              <Path d="M 77 125 L 100 125 L 100 100 L 88 100 Z" fill="#FFA000" />
+              <Path d="M 77 125 L 50 125 L 50 100 L 88 100 Z" fill="#00A825" />
             </G>
-            <Ellipse cx="86.5" cy="130" rx="8" ry="12.5" fill="none" stroke="#FFFFFF" strokeWidth="2" transform="rotate(153, 86.5, 130)" />
+            <Ellipse cx="77" cy="125" rx="10.5" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2.2" transform="rotate(147, 77, 125)" />
           </G>
         )}
 
@@ -429,20 +429,20 @@ function OfficialUnoCardSvg({
           <G>
             {/* Center 4-Color Oval */}
             <G clipPath="url(#wildCenterOval)">
-              <Rect x="0" y="0" width="50" height="74" fill={CARD_COLORS.RED} />
-              <Rect x="50" y="0" width="50" height="74" fill={CARD_COLORS.BLUE} />
-              <Rect x="0" y="74" width="50" height="74" fill={CARD_COLORS.YELLOW} />
-              <Rect x="50" y="74" width="50" height="74" fill={CARD_COLORS.GREEN} />
+              <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#ED3838" />
+              <Path d="M 50 74 L 50 0 L 100 0 L 100 74 Z" fill="#3B4BF5" />
+              <Path d="M 50 74 L 0 74 L 0 148 L 26 148 Z" fill="#FFA000" />
+              <Path d="M 50 74 L 100 74 L 100 148 L 26 148 Z" fill="#00A825" />
             </G>
             <Ellipse
               cx="50"
               cy="74"
-              rx="28"
-              ry="44"
+              rx="35"
+              ry="52"
               fill="none"
               stroke="#FFFFFF"
               strokeWidth="4"
-              transform="rotate(-27, 50, 74)"
+              transform="rotate(-33, 50, 74)"
             />
 
             {/* Center Symbol with Solid Black Shadow */}
