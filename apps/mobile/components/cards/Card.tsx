@@ -11,6 +11,7 @@ import Animated, {
 import { Card as CardType, CardColor, CardType as CType } from '@uno/shared';
 import CardFace from './CardFace';
 import CardBack from './CardBack';
+import { Colors } from '../../constants/colors';
 import { CARD_WIDTH, CARD_HEIGHT, CARD_BORDER_RADIUS } from '../../constants/cardDimensions';
 import { SPRING_BOUNCE } from '../../constants/animations';
 import { usePrefersReducedMotion } from '../../constants/motion';
