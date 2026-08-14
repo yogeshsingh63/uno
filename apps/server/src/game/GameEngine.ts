@@ -7,9 +7,10 @@ import {
   Card, CardColor, CardType, GamePhase, PlayDirection, TurnState,
   PublicGameState, GameAction, GameActionType, RoundScore,
   ChallengeData, RoomSettings, DEFAULT_ROOM_SETTINGS, isCardPlayable,
+  JumpInInfo,
 } from '@uno/shared';
 import { Player } from './Player';
-import { createShuffledDeck, dealCards, drawStartingCard, reshuffleDiscardIntoDraw, FirstCardResult } from './Deck';
+import { createShuffledDeck, dealCards, drawStartingCard, reshuffleDiscardIntoDraw, shuffleDeck, FirstCardResult } from './Deck';
 import { calculateRoundScore, checkGameOver } from './Scoring';
 
 // Timer durations (ms)
@@ -17,6 +18,7 @@ const TURN_TIMEOUT = 30_000;
 const DRAW_TIMEOUT = 15_000;
 const COLOR_TIMEOUT = 15_000;
 const CHALLENGE_TIMEOUT = 10_000;
+const JUMP_IN_WINDOW_MS = 3_000;
 
 export interface TurnTimer {
   timerId: NodeJS.Timeout;
@@ -48,6 +50,10 @@ export class GameEngine {
   // UNO catch tracking
   public unoWindowOpen: Map<string, number>; // playerId → timestamp opened
 
+  // Jump-In window (house rule)
+  public jumpIn: JumpInInfo | null;
+  private jumpInTimer: NodeJS.Timeout | null;
+
   // Turn timer
   public turnTimer: TurnTimer | null;
   public onTurnTimeout: (() => void) | null;
@@ -72,6 +78,8 @@ export class GameEngine {
     this.pendingChallenge = null;
     this.drawnCardPending = new Map();
     this.unoWindowOpen = new Map();
+    this.jumpIn = null;
+    this.jumpInTimer = null;
     this.turnTimer = null;
     this.onTurnTimeout = null;
 
@@ -95,6 +103,7 @@ export class GameEngine {
     this.pendingChallenge = null;
     this.drawnCardPending.clear();
     this.unoWindowOpen.clear();
+    this.closeJumpInWindow();
     this.clearTurnTimer();
 
     for (const p of this.players) p.resetForNewRound();
@@ -167,7 +176,7 @@ export class GameEngine {
   // ============================================================
 
   getCurrentPlayer(): Player {
-    return this.players[this.currentPlayerIndex];
+    return this.players[this.currentPlayerIndex] || this.players[0];
   }
 
   getPlayerById(id: string): Player | undefined {
@@ -200,6 +209,11 @@ export class GameEngine {
         return { success: false, error: 'Can only play the drawn card', actions: [] };
       }
     }
+
+    // A new action closes any open UNO catch windows (rule: catch is only
+    // possible until the next player plays or draws).
+    this.closeUnoWindows();
+    this.closeJumpInWindow();
 
     const card = player.hand.find(c => c.id === cardId);
     if (!card) return { success: false, error: 'Card not in hand', actions: [] };
@@ -250,6 +264,17 @@ export class GameEngine {
       case CardType.NUMBER:
         this.activeColor = card.color;
         actions.push({ type: GameActionType.CARD_PLAYED, playerId, card });
+
+        // 7-0 house rule: 7 = swap hands, 0 = rotate all hands
+        if (this.settings.sevenO && card.value === 7) {
+          if (player.hand.length === 0) return this.handleRoundWin(playerId, actions);
+          this.turnState = TurnState.AWAITING_SWAP;
+          return { success: true, actions };
+        }
+        if (this.settings.sevenO && card.value === 0) {
+          this.rotateHands();
+          actions.push({ type: GameActionType.HANDS_ROTATED, playerId });
+        }
         this.advanceTurn();
         break;
 
@@ -302,6 +327,13 @@ export class GameEngine {
         }
         this.activeColor = declaredColor;
         this.pendingDrawCount += 4;
+
+        // Winning with WD4: no challenge — round ends, penalty is tallied
+        if (player.hand.length === 0) {
+          this.advanceTurn();
+          return this.handleRoundWin(playerId, actions);
+        }
+
         this.pendingChallenge!.declaredColor = declaredColor;
 
         // Advance to next player and set up challenge
@@ -312,7 +344,38 @@ export class GameEngine {
 
         actions.push({ type: GameActionType.WILD_DRAW_FOUR_PLAYED, playerId, card, color: declaredColor });
         return { success: true, actions };
+
+      case CardType.SWAP_HANDS:
+        if (!declaredColor || declaredColor === CardColor.WILD) {
+          this.turnState = TurnState.AWAITING_COLOR;
+          actions.push({ type: GameActionType.SWAP_HANDS_PLAYED, playerId, card });
+          return { success: true, actions };
+        }
+        this.activeColor = declaredColor;
+        actions.push({ type: GameActionType.SWAP_HANDS_PLAYED, playerId, card, color: declaredColor });
+        // Playing it as your last card ends the round — no swap needed
+        if (player.hand.length === 0) return this.handleRoundWin(playerId, actions);
+        this.turnState = TurnState.AWAITING_SWAP;
+        return { success: true, actions };
+
+      case CardType.SHUFFLE_HANDS:
+        if (!declaredColor || declaredColor === CardColor.WILD) {
+          this.turnState = TurnState.AWAITING_COLOR;
+          actions.push({ type: GameActionType.SHUFFLE_HANDS_PLAYED, playerId, card });
+          return { success: true, actions };
+        }
+        this.activeColor = declaredColor;
+        // Playing it as your last card ends the round — no shuffle needed
+        if (player.hand.length === 0) return this.handleRoundWin(playerId, actions);
+        this.shuffleHands();
+        actions.push({ type: GameActionType.SHUFFLE_HANDS_PLAYED, playerId, card, color: declaredColor });
+        this.advanceTurn();
+        this.turnState = TurnState.AWAITING_PLAY;
+        return { success: true, actions };
     }
+
+    // Open a Jump-In window (house rule) for exact-matchable non-wild cards
+    this.openJumpInWindow(playerId, card);
 
     // Check win condition
     if (player.hand.length === 0) {
@@ -334,9 +397,12 @@ export class GameEngine {
     }
 
     this.activeColor = color;
+    this.closeJumpInWindow();
     const actions: GameAction[] = [{ type: GameActionType.COLOR_CHOSEN, playerId, color }];
 
     const topCard = this.getTopCard();
+    const player = this.getPlayerById(playerId);
+
     if (topCard.type === CardType.WILD_DRAW_FOUR) {
       this.pendingDrawCount += 4;
 
@@ -348,13 +414,32 @@ export class GameEngine {
         this.pendingChallenge.timeoutAt = Date.now() + CHALLENGE_TIMEOUT;
       }
       this.turnState = TurnState.AWAITING_CHALLENGE;
+    } else if (topCard.type === CardType.SWAP_HANDS) {
+      // Playing it as your last card ends the round — no swap needed
+      if (player && player.hand.length === 0) {
+        this.advanceTurn();
+        this.turnState = TurnState.AWAITING_PLAY;
+      } else {
+        this.turnState = TurnState.AWAITING_SWAP;
+        return { success: true, actions };
+      }
+    } else if (topCard.type === CardType.SHUFFLE_HANDS) {
+      // Playing it as your last card ends the round — no shuffle needed
+      if (player && player.hand.length === 0) {
+        this.advanceTurn();
+        this.turnState = TurnState.AWAITING_PLAY;
+      } else {
+        this.shuffleHands();
+        actions.push({ type: GameActionType.SHUFFLE_HANDS_PLAYED, playerId, color });
+        this.advanceTurn();
+        this.turnState = TurnState.AWAITING_PLAY;
+      }
     } else {
       this.advanceTurn();
       this.turnState = TurnState.AWAITING_PLAY;
     }
 
     // Check if the color-choosing player won (empty hand after wild)
-    const player = this.getPlayerById(playerId);
     if (player && player.hand.length === 0) {
       return this.handleRoundWin(playerId, actions);
     }
@@ -368,8 +453,13 @@ export class GameEngine {
     const player = this.getPlayerById(playerId);
     if (!player) return { success: false, error: 'Player not found', canPlay: false, actions: [] };
     if (this.getCurrentPlayer().id !== playerId) return { success: false, error: 'Not your turn', canPlay: false, actions: [] };
+    if (this.turnState !== TurnState.AWAITING_PLAY) {
+      return { success: false, error: 'Must play or pass the drawn card first', canPlay: false, actions: [] };
+    }
 
     this.clearTurnTimer();
+    this.closeUnoWindows();
+    this.closeJumpInWindow();
 
     // Handle pending draw penalty (Draw Two stack or forced draw)
     if (this.pendingDrawCount > 0) {
@@ -429,6 +519,8 @@ export class GameEngine {
       this.turnState = TurnState.AWAITING_PLAY; // Allow playCard to process
       return this.playCard(playerId, drawnCard.id);
     } else {
+      this.closeUnoWindows();
+      this.closeJumpInWindow();
       this.advanceTurn();
       this.turnState = TurnState.AWAITING_PLAY;
       return { success: true, actions: [{ type: GameActionType.TURN_PASSED, playerId }] };
@@ -439,6 +531,8 @@ export class GameEngine {
     if (this.getCurrentPlayer().id !== playerId) return { success: false, error: 'Not your turn' };
     if (this.turnState !== TurnState.DREW_CARD) return { success: false, error: 'Can only pass after drawing' };
 
+    this.closeUnoWindows();
+    this.closeJumpInWindow();
     this.drawnCardPending.delete(playerId);
     this.clearTurnTimer();
     this.advanceTurn();
@@ -472,14 +566,15 @@ export class GameEngine {
     if (!target) return { success: false, penalized: false, error: 'Target not found' };
     if (target.hand.length !== 1) return { success: false, penalized: false, error: 'Target does not have 1 card' };
 
-    // Check if UNO window is still open
-    const windowOpen = this.unoWindowOpen.get(targetId);
-    if (!windowOpen) return { success: false, penalized: false, error: 'UNO window closed' };
-
     if (target.hasCalledUno) {
       // Already declared — safe
       return { success: true, penalized: false };
     }
+
+    // Check if UNO window is still open
+    const windowOpen = this.unoWindowOpen.get(targetId);
+    if (!windowOpen) return { success: false, penalized: false, error: 'UNO window closed' };
+
 
     // Caught! Draw 2 penalty
     const cards = this.drawCards(2);
@@ -517,6 +612,7 @@ export class GameEngine {
 
     this.pendingDrawCount = 0;
     this.clearTurnTimer();
+    this.closeJumpInWindow();
 
     if (wasLegal) {
       // Challenge FAILS — challenger draws 6 (4 + 2 penalty)
@@ -552,8 +648,195 @@ export class GameEngine {
     this.pendingChallenge = null;
     this.turnState = TurnState.AWAITING_PLAY;
     this.clearTurnTimer();
+    this.closeJumpInWindow();
     this.advanceTurn();
     return { success: true };
+  }
+
+  // ============================================================
+  // MODERN WILDS & HOUSE RULES (7-0, Jump-In)
+  // ============================================================
+
+  /** Swap the current player's hand with another player (Swap Hands card / 7-0 rule). */
+  swapHands(playerId: string, targetPlayerId: string): {
+    success: boolean; error?: string; actions: GameAction[];
+  } {
+    if (this.turnState !== TurnState.AWAITING_SWAP) {
+      return { success: false, error: 'Not waiting for a hand swap', actions: [] };
+    }
+    if (this.getCurrentPlayer().id !== playerId) return { success: false, error: 'Not your turn', actions: [] };
+    const player = this.getPlayerById(playerId);
+    const target = this.getPlayerById(targetPlayerId);
+    if (!player || !target) return { success: false, error: 'Player not found', actions: [] };
+    if (player.id === target.id) return { success: false, error: 'Cannot swap with yourself', actions: [] };
+
+    const temp = player.hand;
+    player.hand = target.hand;
+    target.hand = temp;
+
+    // Reset UNO state for both players after the swap
+    player.hasCalledUno = false;
+    player.unoCallOpenAt = null;
+    target.hasCalledUno = false;
+    target.unoCallOpenAt = null;
+    this.unoWindowOpen.delete(player.id);
+    this.unoWindowOpen.delete(target.id);
+    this.openUnoWindowsFor([player, target]);
+
+    this.turnState = TurnState.AWAITING_PLAY;
+    this.closeJumpInWindow();
+    this.advanceTurn();
+    return { success: true, actions: [{ type: GameActionType.HAND_SWAPPED, playerId, targetPlayerId }] };
+  }
+
+  /** 7-0 rule: every player passes their hand to the next player in play direction. */
+  private rotateHands(): void {
+    const hands = this.players.map(p => p.hand);
+    this.players.forEach((p, i) => {
+      const from = (i - this.direction + this.players.length) % this.players.length;
+      p.hand = hands[from];
+      p.hasCalledUno = false;
+      p.unoCallOpenAt = null;
+    });
+    this.unoWindowOpen.clear();
+    this.openUnoWindowsFor(this.players);
+  }
+
+  /** Shuffle Hands card: collect every hand, shuffle, redeal evenly starting from the next player. */
+  private shuffleHands(): void {
+    const all: Card[] = [];
+    for (const p of this.players) {
+      all.push(...p.hand);
+      p.hand = [];
+      p.hasCalledUno = false;
+      p.unoCallOpenAt = null;
+    }
+    this.unoWindowOpen.clear();
+
+    const shuffled = shuffleDeck(all);
+    const n = this.players.length;
+    if (n === 0) return;
+    const start = (this.currentPlayerIndex + this.direction + n) % n;
+    for (let i = 0; i < shuffled.length; i++) {
+      this.players[(start + i) % n].hand.push(shuffled[i]);
+    }
+    this.openUnoWindowsFor(this.players);
+  }
+
+  private openUnoWindowsFor(players: Player[]): void {
+    for (const p of players) {
+      if (p.hand.length === 1 && !p.hasCalledUno) {
+        p.unoCallOpenAt = Date.now();
+        this.unoWindowOpen.set(p.id, Date.now());
+      }
+    }
+  }
+
+  // ============================================================
+  // JUMP-IN (house rule)
+  // ============================================================
+
+  private openJumpInWindow(playerId: string, card: Card): void {
+    if (!this.settings.jumpIn) return;
+    if (this.pendingDrawCount > 0) return;
+    if (card.type === CardType.WILD || card.type === CardType.WILD_DRAW_FOUR ||
+        card.type === CardType.SWAP_HANDS || card.type === CardType.SHUFFLE_HANDS) return;
+
+    const signature = `${card.color}:${card.type}:${card.value ?? ''}`;
+    this.closeJumpInWindow();
+    this.jumpIn = { signature, playedBy: playerId, openedAt: Date.now(), expiresAt: Date.now() + JUMP_IN_WINDOW_MS };
+    this.jumpInTimer = setTimeout(() => {
+      this.jumpIn = null;
+      this.jumpInTimer = null;
+    }, JUMP_IN_WINDOW_MS);
+  }
+
+  private closeJumpInWindow(): void {
+    if (this.jumpInTimer) {
+      clearTimeout(this.jumpInTimer);
+      this.jumpInTimer = null;
+    }
+    this.jumpIn = null;
+  }
+
+  /** Play an exact-match card out of turn (Jump-In house rule). */
+  jumpInPlay(playerId: string, cardId: string): {
+    success: boolean; error?: string; actions: GameAction[];
+  } {
+    if (!this.jumpIn || Date.now() > this.jumpIn.expiresAt) {
+      this.closeJumpInWindow();
+      return { success: false, error: 'Jump-In window closed', actions: [] };
+    }
+    if (this.phase !== GamePhase.PLAYING) return { success: false, error: 'Not in playing phase', actions: [] };
+    const player = this.getPlayerById(playerId);
+    if (!player) return { success: false, error: 'Player not found', actions: [] };
+    if (player.id === this.jumpIn.playedBy) return { success: false, error: 'You cannot jump on your own card', actions: [] };
+
+    const card = player.hand.find(c => c.id === cardId);
+    if (!card) return { success: false, error: 'Card not in hand', actions: [] };
+
+    const top = this.getTopCard();
+    const signature = `${card.color}:${card.type}:${card.value ?? ''}`;
+    if (signature !== this.jumpIn.signature) {
+      return { success: false, error: 'Card must match the top card exactly', actions: [] };
+    }
+
+    this.closeUnoWindows();
+    this.closeJumpInWindow();
+
+    player.removeCard(cardId);
+    this.discardPile.push(card);
+    this.drawnCardPending.delete(playerId);
+    this.clearTurnTimer();
+
+    this.currentPlayerIndex = this.players.findIndex(p => p.id === playerId);
+    this.activeColor = card.color;
+
+    const actions: GameAction[] = [{ type: GameActionType.JUMP_IN_PLAYED, playerId, card }];
+
+    // Apply the same effects as a normal play (non-wild cards only)
+    switch (card.type) {
+      case CardType.SKIP:
+        if (this.players.length === 2) {
+          // 2-player: current player goes again
+        } else {
+          this.advanceTurn();
+          this.advanceTurn();
+        }
+        break;
+      case CardType.REVERSE:
+        this.direction = (this.direction * -1) as PlayDirection;
+        if (this.players.length > 2) this.advanceTurn();
+        break;
+      case CardType.DRAW_TWO:
+        this.pendingDrawCount += 2;
+        actions.push({ type: GameActionType.DRAW_TWO, playerId, card, penaltyCount: this.pendingDrawCount });
+        this.advanceTurn();
+        break;
+      default:
+        this.advanceTurn();
+        break;
+    }
+
+    // UNO window for the jumper
+    if (player.hand.length === 1 && !player.hasCalledUno) {
+      player.unoCallOpenAt = Date.now();
+      this.unoWindowOpen.set(playerId, Date.now());
+    }
+
+    this.turnState = TurnState.AWAITING_PLAY;
+    if (player.hand.length === 0) {
+      return this.handleRoundWin(playerId, actions);
+    }
+    return { success: true, actions };
+  }
+
+  /** Reset scores and start a brand-new game (Play Again). */
+  resetForNewGame(): FirstCardResult {
+    for (const p of this.players) this.scores[p.id] = 0;
+    this.winnerIdGame = null;
+    this.winnerIdThisRound = null;
+    return this.startNewRound();
   }
 
   // ============================================================
@@ -561,7 +844,7 @@ export class GameEngine {
   // ============================================================
 
   private advanceTurn(): void {
-    this.closeUnoWindows();
+    if (this.players.length === 0) return;
     let nextIndex = this.currentPlayerIndex;
     let attempts = 0;
     do {
@@ -603,12 +886,12 @@ export class GameEngine {
     this.clearTurnTimer();
 
     // Pre-score step (Section 9): if winning card was D2 or WD4,
-    // affected player draws first (those cards counted in score)
-    const topCard = this.getTopCard();
+    // the affected player draws first (those cards counted in score).
+    // The turn has already advanced past the winner, so the affected
+    // player is the current player.
     if (this.pendingDrawCount > 0) {
-      const nextPlayerIndex = (this.currentPlayerIndex + this.direction + this.players.length) % this.players.length;
-      const affectedPlayer = this.players[nextPlayerIndex];
-      if (affectedPlayer) {
+      const affectedPlayer = this.getCurrentPlayer();
+      if (affectedPlayer && affectedPlayer.id !== winnerId) {
         const penaltyCards = this.drawCards(this.pendingDrawCount);
         affectedPlayer.addCards(penaltyCards);
         this.pendingDrawCount = 0;
@@ -665,6 +948,12 @@ export class GameEngine {
         targetPlayerId: this.pendingChallenge.targetPlayerId,
         timeoutAt: this.pendingChallenge.timeoutAt,
       } : null,
+      jumpIn: this.jumpIn && Date.now() <= this.jumpIn.expiresAt ? this.jumpIn : null,
+      swapOptions: this.turnState === TurnState.AWAITING_SWAP
+        ? this.players
+            .filter(p => p.id !== this.getCurrentPlayer().id && (p.isConnected || p.isBot))
+            .map(p => p.id)
+        : null,
       settings: this.settings,
     };
   }

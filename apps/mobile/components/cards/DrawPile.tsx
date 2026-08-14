@@ -18,9 +18,11 @@ interface DrawPileProps {
   count: number;
   isMyTurn: boolean;
   onDraw: () => void;
+  cardWidth?: number;
+  cardHeight?: number;
 }
 
-export default function DrawPile({ count, isMyTurn, onDraw }: DrawPileProps) {
+export default function DrawPile({ count, isMyTurn, onDraw, cardWidth = CARD_WIDTH, cardHeight = CARD_HEIGHT }: DrawPileProps) {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
 
@@ -53,16 +55,18 @@ export default function DrawPile({ count, isMyTurn, onDraw }: DrawPileProps) {
 
   return (
     <AnimatedPressable onPress={handlePress} style={[animatedStyle]}>
-      <Animated.View style={[styles.container, glowStyle]}>
+      <Animated.View style={[styles.container, glowStyle, { width: cardWidth + 6, height: cardHeight + 6 }]}>
         {/* Stacked card backs for 3D depth */}
         {[2, 1, 0].map((offset) => (
           <View key={offset} style={[styles.stackedCard, {
             top: -offset * 2,
             left: offset * 1.5,
+            width: cardWidth,
+            height: cardHeight,
           }]}>
             <CardBack
-              width={CARD_WIDTH}
-              height={CARD_HEIGHT}
+              width={cardWidth}
+              height={cardHeight}
               borderRadius={10}
             />
           </View>
@@ -86,8 +90,6 @@ export default function DrawPile({ count, isMyTurn, onDraw }: DrawPileProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: CARD_WIDTH + 6,
-    height: CARD_HEIGHT + 6,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.neonCyan,
@@ -97,8 +99,6 @@ const styles = StyleSheet.create({
   },
   stackedCard: {
     position: 'absolute',
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
   },
   countBadge: {
     position: 'absolute',

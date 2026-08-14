@@ -41,6 +41,16 @@ export class BotPlayer {
     return this.player.getMostFrequentColor();
   }
 
+  /** Pick a swap target — prefers the player closest to winning. */
+  chooseSwapTarget(): string {
+    const others = this.game.players.filter(p =>
+      p.id !== this.player.id && (p.isConnected || p.isBot)
+    );
+    if (others.length === 0) return this.player.id;
+    others.sort((a, b) => a.hand.length - b.hand.length);
+    return others[0].id;
+  }
+
   shouldChallengeDrawFour(): boolean {
     return Math.random() > 0.6; // 40% chance to challenge
   }

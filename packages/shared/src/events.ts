@@ -9,6 +9,8 @@ export const CLIENT_EVENTS = {
   LEAVE_ROOM: 'leave_room',
   PLAYER_READY: 'set_ready',
   START_GAME: 'start_game',
+  NEXT_ROUND: 'next_round',
+  PLAY_AGAIN: 'play_again',
   ADD_BOT: 'add_bot',
   UPDATE_SETTINGS: 'update_settings',
   RECONNECT_ROOM: 'reconnect_room',
@@ -19,6 +21,8 @@ export const CLIENT_EVENTS = {
   PASS_TURN: 'pass_turn',
   PLAY_DRAWN_CARD: 'play_drawn_card',
   CHOOSE_COLOR: 'choose_color',
+  SWAP_HANDS: 'swap_hands',
+  JUMP_IN: 'jump_in',
 
   // UNO & Challenge
   DECLARE_UNO: 'declare_uno',

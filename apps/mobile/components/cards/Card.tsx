@@ -13,6 +13,7 @@ import CardFace from './CardFace';
 import CardBack from './CardBack';
 import { CARD_WIDTH, CARD_HEIGHT, CARD_BORDER_RADIUS } from '../../constants/cardDimensions';
 import { SPRING_BOUNCE } from '../../constants/animations';
+import { usePrefersReducedMotion } from '../../constants/motion';
 
 interface CardProps {
   card: CardType;
@@ -25,6 +26,9 @@ interface CardProps {
   style?: any;
   declaredColor?: string | null;
   challengePending?: boolean;
+  /** Responsive override — when provided, wins over the static size map */
+  cardWidth?: number;
+  cardHeight?: number;
 }
 
 const SIZES = {
@@ -39,39 +43,36 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function CardComponent({
   card, onPress, disabled, isPlayable, faceDown, small, size = 'hand',
-  style, declaredColor, challengePending,
+  style, declaredColor, challengePending, cardWidth, cardHeight,
 }: CardProps) {
   const scale = useSharedValue(1);
   const translateY = useSharedValue(0);
   const glowOpacity = useSharedValue(0);
+  const reduced = usePrefersReducedMotion();
 
   const dim = small ? SIZES.mini : SIZES[size];
-  const w = dim.w;
-  const h = dim.h;
+  const w = cardWidth ?? dim.w;
+  const h = cardHeight ?? Math.round(w * (10 / 7));
   const br = Math.round(w * 0.143); // ~10px at 70w
 
-  // STATE 1 — Playable float animation
+  // STATE 1 — Playable float animation (single light loop per card)
   useEffect(() => {
     if (isPlayable && !faceDown && !disabled) {
-      translateY.value = withRepeat(
-        withSequence(
-          withTiming(-4, { duration: 700 }),
-          withTiming(0, { duration: 700 }),
-        ),
-        -1, true
-      );
-      glowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.75, { duration: 800 }),
-          withTiming(0.3, { duration: 800 }),
-        ),
-        -1, true
-      );
+      if (!reduced) {
+        translateY.value = withRepeat(
+          withSequence(
+            withTiming(-5, { duration: 950 }),
+            withTiming(0, { duration: 950 }),
+          ),
+          -1, true
+        );
+      }
+      glowOpacity.value = withTiming(0.45, { duration: 300 });
     } else {
       translateY.value = withTiming(0, { duration: 200 });
       glowOpacity.value = withTiming(0, { duration: 200 });
     }
-  }, [isPlayable, faceDown, disabled]);
+  }, [isPlayable, faceDown, disabled, reduced]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [

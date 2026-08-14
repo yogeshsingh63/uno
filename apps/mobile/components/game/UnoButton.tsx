@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence,
   withSpring, withTiming,
 } from 'react-native-reanimated';
+import { soundService } from '../../services/soundService';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -14,9 +15,10 @@ interface UnoButtonProps {
   visible: boolean;
   shouldPulse?: boolean;
   onPress: () => void;
+  bottomOffset?: number;
 }
 
-function UnoButton({ visible, shouldPulse, onPress }: UnoButtonProps) {
+function UnoButton({ visible, shouldPulse, onPress, bottomOffset = 145 }: UnoButtonProps) {
   const scale = useSharedValue(0.82);
   const glowOpacity = useSharedValue(0);
   const labelScale = useSharedValue(0);
@@ -66,6 +68,8 @@ function UnoButton({ visible, shouldPulse, onPress }: UnoButtonProps) {
   const handlePress = () => {
     if (!visible) return;
 
+    soundService.play('uno');
+
     // Press feedback
     scale.value = withSequence(
       withTiming(0.88, { duration: 80 }),
@@ -90,7 +94,7 @@ function UnoButton({ visible, shouldPulse, onPress }: UnoButtonProps) {
   };
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { bottom: bottomOffset }]}>
       {/* Floating "UNO!" text */}
       <Animated.Text style={[styles.floatingLabel, labelStyle]}>
         UNO!
@@ -111,7 +115,6 @@ function UnoButton({ visible, shouldPulse, onPress }: UnoButtonProps) {
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    bottom: 145,
     right: 20,
     alignItems: 'center',
     zIndex: 50,

@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "npx tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "npx tsx tests/rules.test.ts"
   },
   "dependencies": {
+    "@uno/shared": "file:../../packages/shared",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",

@@ -1,9 +1,13 @@
 // ============================================================
-// NumberCard — Digits 0–9 (Section 5)
+// NumberCard — Real UNO number card layout
+// Large centered number on a white oval (tilted), with corner
+// indices in white at top-left and bottom-right (inverted).
+// Matches official UNO card design proportions.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { getCardColorHex, getCardColorHlHex, COLOR_INITIALS } from '../../constants/cardColors';
+import CardShell from './CardShell';
+import { COLOR_GRADIENTS, COLOR_INKS } from '../../constants/cardColors';
 
 interface NumberCardProps {
   color: string;   // RED, YELLOW, GREEN, BLUE
@@ -13,115 +17,86 @@ interface NumberCardProps {
   borderRadius?: number;
 }
 
-function NumberCard({ color, value, width, height, borderRadius = 10 }: NumberCardProps) {
-  const bg = getCardColorHex(color);
-  const hl = getCardColorHlHex(color);
+function NumberCard({ color, value, width, height, borderRadius = 12 }: NumberCardProps) {
+  const gradient = COLOR_GRADIENTS[color] || COLOR_GRADIENTS.RED;
+  const ink = COLOR_INKS[color] || COLOR_INKS.RED;
   const digit = String(value);
-  const initial = COLOR_INITIALS[color] || '';
+
+  // Real UNO: large centered oval with the number inside
+  const ovalW = width * 0.72;
+  const ovalH = height * 0.52;
+  const ovalRadius = ovalH / 2;
   const centerFontSize = height * 0.42;
   const cornerFontSize = height * 0.14;
-  const initialFontSize = height * 0.08;
   const needsUnderline = value === 6 || value === 9;
 
   return (
-    <View style={[styles.card, { width, height, borderRadius, backgroundColor: bg }]}>
-      {/* Radial highlight effect */}
-      <View style={[styles.radialHighlight, { backgroundColor: hl, opacity: 0.3 }]} />
-
-      {/* White diagonal oval */}
-      <View style={[styles.oval, {
-        width: width * 1.4,
-        height: height * 0.68,
-        borderRadius: (height * 0.68) / 2,
-        transform: [{ rotate: '25deg' }],
-      }]} />
+    <CardShell width={width} height={height} borderRadius={borderRadius} gradient={gradient}>
+      {/* Center white oval with the digit — tilted like real UNO */}
+      <View
+        style={[styles.oval, {
+          width: ovalW,
+          height: ovalH,
+          borderRadius: ovalRadius,
+        }]}
+      >
+        <Text style={[styles.digit, { fontSize: centerFontSize, color: ink }]}>{digit}</Text>
+        {needsUnderline && (
+          <View style={[styles.underline, { backgroundColor: ink }]} />
+        )}
+      </View>
 
       {/* Top-left corner */}
       <View style={styles.cornerTL}>
-        <Text style={[styles.cornerText, { fontSize: cornerFontSize, color: bg }]}>{digit}</Text>
-        <Text style={[styles.cornerInitial, { fontSize: initialFontSize, color: bg }]}>{initial}</Text>
+        <Text style={[styles.cornerText, { fontSize: cornerFontSize }]}>{digit}</Text>
       </View>
-
-      {/* Bottom-right corner (180° rotated) */}
+      {/* Bottom-right corner (rotated 180°) */}
       <View style={styles.cornerBR}>
-        <Text style={[styles.cornerText, { fontSize: cornerFontSize, color: bg }]}>{digit}</Text>
-        <Text style={[styles.cornerInitial, { fontSize: initialFontSize, color: bg }]}>{initial}</Text>
+        <Text style={[styles.cornerText, { fontSize: cornerFontSize }]}>{digit}</Text>
       </View>
-
-      {/* Center digit */}
-      <Text style={[styles.centerText, {
-        fontSize: centerFontSize,
-        color: bg,
-        textShadowColor: '#FFFFFF',
-      }]}>
-        {digit}
-      </Text>
-
-      {/* 6/9 disambiguation dot */}
-      {needsUnderline && (
-        <View style={[styles.disambiguationDot, { top: height * 0.62, backgroundColor: '#FFFFFF' }]} />
-      )}
-    </View>
+    </CardShell>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: 'rgba(0,0,0,0.45)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  radialHighlight: {
-    position: 'absolute',
-    width: '60%',
-    height: '60%',
-    borderRadius: 100,
-  },
   oval: {
     position: 'absolute',
-    backgroundColor: '#FFFFFF',
-  },
-  cornerTL: {
-    position: 'absolute',
-    top: 5,
-    left: 6,
+    backgroundColor: '#FFF5E6',
     alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ rotate: '-22deg' }],
+    shadowColor: 'rgba(0,0,0,0.3)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 4,
   },
+  digit: {
+    fontWeight: '900',
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0,0,0,0.10)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  underline: {
+    position: 'absolute',
+    bottom: '20%',
+    width: 8,
+    height: 2,
+    borderRadius: 1,
+  },
+  cornerTL: { position: 'absolute', top: 4, left: 6 },
   cornerBR: {
-    position: 'absolute',
-    bottom: 5,
-    right: 6,
-    alignItems: 'center',
+    position: 'absolute', bottom: 4, right: 6,
     transform: [{ rotate: '180deg' }],
   },
   cornerText: {
+    color: '#FFF5E6',
     fontWeight: '900',
-    lineHeight: undefined,
-  },
-  cornerInitial: {
-    fontWeight: '700',
-    opacity: 0.7,
-    marginTop: -2,
-  },
-  centerText: {
-    fontWeight: '900',
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0,0,0,0.4)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
-    zIndex: 2,
-  },
-  disambiguationDot: {
-    position: 'absolute',
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    zIndex: 3,
   },
 });
 

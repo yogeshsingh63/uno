@@ -62,6 +62,10 @@ export function createFullDeck(): Card[] {
     deck.push(createCard(CardColor.WILD, CardType.WILD_DRAW_FOUR));
   }
 
+  // Modern 112-card deck additions: 1 Wild Swap Hands + 1 Wild Shuffle Hands
+  deck.push(createCard(CardColor.WILD, CardType.SWAP_HANDS));
+  deck.push(createCard(CardColor.WILD, CardType.SHUFFLE_HANDS));
+
   return deck;
 }
 

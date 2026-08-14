@@ -3,6 +3,8 @@ import { StyleSheet, View, Text, Pressable, Modal, ScrollView } from 'react-nati
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { Colors } from '../../constants/colors';
 import { PlayerGameState } from '@uno/shared';
+import ConfettiBurst from '../ui/ConfettiBurst';
+import CountUp from '../ui/CountUp';
 
 interface EndRoundModalProps {
   visible: boolean;
@@ -24,6 +26,7 @@ export default function EndRoundModal({
   return (
     <Modal transparent animationType="fade" visible={visible}>
       <Animated.View entering={FadeIn.duration(300)} style={styles.overlay}>
+        <ConfettiBurst burstKey={winnerName ?? 'round'} />
         <Animated.View entering={ZoomIn.duration(400)} style={styles.modal}>
           <Text style={styles.title}>🎉 Round Over!</Text>
           <Text style={styles.winner}>{winnerName} wins the round!</Text>
@@ -38,7 +41,7 @@ export default function EndRoundModal({
                 <Text style={styles.rank}>{i + 1}.</Text>
                 <Text style={styles.playerAvatar}>{p.avatar}</Text>
                 <Text style={[styles.playerName, { flex: 1 }]}>{p.name}</Text>
-                <Text style={styles.scoreText}>{scores[p.id] || 0}</Text>
+                <CountUp value={scores[p.id] || 0} style={styles.scoreText} />
               </View>
             ))}
           </ScrollView>

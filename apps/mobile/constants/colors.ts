@@ -1,45 +1,59 @@
+// ============================================================
+// Colors — Warm Luxury Lounge palette
+// Deep warm blacks, cream/ivory card tones, vivid suit colors,
+// and amber/gold accent lighting throughout.
+// ============================================================
+
 export const Colors = {
-  background: '#0d0d1a',
-  surface: '#1a1a2e',
-  surfaceLight: '#252540',
-  surfaceBorder: '#333355',
+  // Backgrounds — warm charcoal-black with a hint of burgundy
+  background: '#0c0a0f',
+  surface: 'rgba(28, 22, 30, 0.85)',
+  surfaceLight: 'rgba(42, 32, 48, 0.80)',
+  surfaceBorder: 'rgba(255, 220, 180, 0.12)',
+  surfaceBorderGlow: 'rgba(255, 180, 80, 0.30)',
 
-  red: '#ff2d55',
-  yellow: '#ffd60a',
-  green: '#30d158',
-  blue: '#0a84ff',
+  // Card suit colors — vivid and saturated
+  red: '#E8364B',
+  yellow: '#F5B800',
+  green: '#2EBD5E',
+  blue: '#2B8BF5',
 
-  redDark: '#cc1a3a',
-  yellowDark: '#ccaa00',
-  greenDark: '#1fa044',
-  blueDark: '#0066cc',
+  redDark: '#A0182A',
+  yellowDark: '#B38600',
+  greenDark: '#1A7A3B',
+  blueDark: '#1A5DB3',
 
-  redGlow: 'rgba(255, 45, 85, 0.4)',
-  yellowGlow: 'rgba(255, 214, 10, 0.4)',
-  greenGlow: 'rgba(48, 209, 88, 0.4)',
-  blueGlow: 'rgba(10, 132, 255, 0.4)',
+  redGlow: 'rgba(232, 54, 75, 0.6)',
+  yellowGlow: 'rgba(245, 184, 0, 0.6)',
+  greenGlow: 'rgba(46, 189, 94, 0.6)',
+  blueGlow: 'rgba(43, 139, 245, 0.6)',
 
-  white: '#ffffff',
-  textPrimary: '#ffffff',
-  textSecondary: '#8e8ea0',
-  textMuted: '#555570',
+  // Text
+  white: '#FEFCFA',
+  textPrimary: '#F5F0EB',
+  textSecondary: '#B8A89A',
+  textMuted: '#7A6B5E',
 
-  neonPink: '#ff2d55',
-  neonPurple: '#bf5af2',
-  neonCyan: '#64d2ff',
+  // Accents
+  neonPink: '#E8364B',
+  neonPurple: '#A855F7',
+  neonCyan: '#4EC8E8',
+  neonGold: '#F5B800',
+  metallicGold: '#D4A843',
+  cream: '#FFF5E6',
+  ivory: '#FAF0DC',
 
-  success: '#30d158',
-  error: '#ff453a',
-  warning: '#ffd60a',
+  success: '#2EBD5E',
+  error: '#E8364B',
+  warning: '#F5B800',
 
-  cardBack: '#1a1a3e',
-  overlay: 'rgba(0, 0, 0, 0.7)',
+  cardBack: '#1A0E12',
+  overlay: 'rgba(8, 6, 10, 0.88)',
 };
 
 export const UNO_CARD_COLORS: Record<string, { primary: string; dark: string; glow: string }> = {
-  RED: { primary: '#E53935', dark: '#C62828', glow: 'rgba(229,57,53,0.4)' },
-  YELLOW: { primary: '#FFD600', dark: '#F9A825', glow: 'rgba(255,214,0,0.4)' },
-  GREEN: { primary: '#43A047', dark: '#2E7D32', glow: 'rgba(67,160,71,0.4)' },
-  BLUE: { primary: '#1E88E5', dark: '#1565C0', glow: 'rgba(30,136,229,0.4)' },
-  WILD: { primary: '#1C1C1E', dark: '#111113', glow: 'rgba(142,142,160,0.4)' },
+  RED: { primary: Colors.red, dark: Colors.redDark, glow: Colors.redGlow },
+  YELLOW: { primary: Colors.yellow, dark: Colors.yellowDark, glow: Colors.yellowGlow },
+  GREEN: { primary: Colors.green, dark: Colors.greenDark, glow: Colors.greenGlow },
+  BLUE: { primary: Colors.blue, dark: Colors.blueDark, glow: Colors.blueGlow },
 };

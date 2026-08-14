@@ -7,11 +7,12 @@ import * as crypto from 'crypto';
 import { CLIENT_EVENTS, SERVER_EVENTS } from '@uno/shared';
 import {
   CreateRoomPayload, JoinRoomPayload, PlayCardPayload, DrawCardPayload,
-  PlayDrawnCardPayload, ChooseColorPayload, StartGamePayload,
+  PlayDrawnCardPayload, ChooseColorPayload, StartGamePayload, NextRoundPayload,
+  PlayAgainPayload, SwapHandsPayload, JumpInPayload,
   PlayerReadyPayload, LeaveRoomPayload, AddBotPayload, UpdateSettingsPayload,
   SendEmojiPayload, ReconnectPayload, PassTurnPayload,
   CallUnoPayload, CallCatchPayload, ChallengeWd4Payload, AcceptWd4Payload,
-  GamePhase, TurnState, RoomStatus,
+  GamePhase, TurnState, RoomStatus, CardType, isCardPlayable,
 } from '@uno/shared';
 import { RoomManager } from '../rooms/RoomManager';
 import { Player } from '../game/Player';
@@ -61,33 +62,61 @@ function emitGameState(io: Server, roomCode: string) {
 }
 
 function scheduleBot(io: Server, roomCode: string) {
-  setTimeout(() => handleBotTurn(io, roomCode), 1500);
+  setTimeout(() => handleBotTurn(io, roomCode), 900);
 }
 
 function handleBotTurn(io: Server, roomCode: string) {
   const room = roomManager.getRoom(roomCode);
   if (!room || !room.game) return;
-  if (room.game.phase !== GamePhase.PLAYING) return;
+  const game = room.game;
+  if (game.phase !== GamePhase.PLAYING) return;
 
-  const currentPlayer = room.game.getCurrentPlayer();
+  // Jump-In (house rule): any bot holding the exact match can jump in out of turn
+  if (game.jumpIn && game.settings.jumpIn) {
+    const top = game.getTopCard();
+    const jumper = room.players.find(p =>
+      p.isBot && p.id !== game.getCurrentPlayer().id &&
+      p.hand.some(c => c.color === top.color && c.type === top.type && c.value === top.value)
+    );
+    if (jumper) {
+      const card = jumper.hand.find(c => c.color === top.color && c.type === top.type && c.value === top.value)!;
+      const jumpResult = game.jumpInPlay(jumper.id, card.id);
+      if (jumpResult.success) {
+        checkRoundEnd(io, roomCode);
+        emitGameState(io, roomCode);
+        return;
+      }
+    }
+  }
+
+  const currentPlayer = game.getCurrentPlayer();
   if (!currentPlayer.isBot) return;
 
+  // Handle swap state (Swap Hands card / 7-0 rule)
+  if (game.turnState === TurnState.AWAITING_SWAP) {
+    const bot = new BotPlayer(game, currentPlayer);
+    game.swapHands(currentPlayer.id, bot.chooseSwapTarget());
+    checkRoundEnd(io, roomCode);
+    emitGameState(io, roomCode);
+    return;
+  }
+
   // Handle challenge state
-  if (room.game.turnState === TurnState.AWAITING_CHALLENGE && room.game.pendingChallenge) {
-    const bot = new BotPlayer(room.game, currentPlayer);
+  if (game.turnState === TurnState.AWAITING_CHALLENGE && game.pendingChallenge) {
+    const bot = new BotPlayer(game, currentPlayer);
     if (bot.shouldChallengeDrawFour()) {
-      const result = room.game.challengeDrawFour(currentPlayer.id);
+      const result = game.challengeDrawFour(currentPlayer.id);
       if (result.success) {
         io.to(roomCode).emit(SERVER_EVENTS.CHALLENGE_RESULT, {
           success: result.challengeWon,
           challengerId: currentPlayer.id,
-          challengedId: room.game.pendingChallenge?.challengedPlayerId || '',
+          challengedId: game.pendingChallenge?.challengedPlayerId || '',
           penaltyPlayerId: result.penaltyPlayerId,
           penaltyCards: result.penaltyCount,
         });
       }
     } else {
-      room.game.acceptDrawFour(currentPlayer.id);
+      game.acceptDrawFour(currentPlayer.id);
     }
     checkRoundEnd(io, roomCode);
     emitGameState(io, roomCode);
@@ -95,47 +124,94 @@ function handleBotTurn(io: Server, roomCode: string) {
   }
 
   // Handle color choice
-  if (room.game.turnState === TurnState.AWAITING_COLOR) {
-    const bot = new BotPlayer(room.game, currentPlayer);
+  if (game.turnState === TurnState.AWAITING_COLOR) {
+    const bot = new BotPlayer(game, currentPlayer);
     const color = bot.chooseColor();
-    room.game.chooseColor(currentPlayer.id, color);
+    game.chooseColor(currentPlayer.id, color);
     checkRoundEnd(io, roomCode);
     emitGameState(io, roomCode);
     return;
   }
 
-  if (room.game.turnState !== TurnState.AWAITING_PLAY && room.game.turnState !== TurnState.DREW_CARD) return;
+  // Bot is holding a drawn, playable card — play it (or pass)
+  if (game.turnState === TurnState.DREW_CARD) {
+    const drawn = game.drawnCardPending.get(currentPlayer.id);
+    if (drawn) {
+      const bot = new BotPlayer(game, currentPlayer);
+      game.playDrawnCard(currentPlayer.id, true);
+      if ((game.turnState as TurnState) === TurnState.AWAITING_COLOR) {
+        game.chooseColor(currentPlayer.id, bot.chooseColor());
+      }
+    } else {
+      game.passTurn(currentPlayer.id);
+    }
+    checkRoundEnd(io, roomCode);
+    emitGameState(io, roomCode);
+    return;
+  }
 
-  const bot = new BotPlayer(room.game, currentPlayer);
+  if (game.turnState !== TurnState.AWAITING_PLAY) return;
+
+  // If the bot owes penalty cards (Draw Two), it must draw (or stack a D2)
+  if (game.pendingDrawCount > 0) {
+    const stacking = game.settings.stacking;
+    const d2 = stacking
+      ? currentPlayer.hand.find(c => c.type === CardType.DRAW_TWO &&
+          isCardPlayable(c, game.getTopCard(), game.activeColor))
+      : undefined;
+    if (d2) {
+      game.playCard(currentPlayer.id, d2.id);
+    } else {
+      game.drawCard(currentPlayer.id);
+    }
+    checkRoundEnd(io, roomCode);
+    emitGameState(io, roomCode);
+    return;
+  }
+
+  const bot = new BotPlayer(game, currentPlayer);
   const action = bot.decideAction();
 
   if (action.type === 'play') {
-    const chosenColor = action.card?.type === 'WILD' || action.card?.type === 'WILD_DRAW_FOUR'
-      ? bot.chooseColor() : undefined;
+    const isWild = action.card?.type === 'WILD' || action.card?.type === 'WILD_DRAW_FOUR' ||
+      action.card?.type === 'SWAP_HANDS' || action.card?.type === 'SHUFFLE_HANDS';
+    const chosenColor = isWild ? bot.chooseColor() : undefined;
 
     // Call UNO if down to 1 card after playing
     if (currentPlayer.hand.length === 2) {
-      room.game.declareUno(currentPlayer.id);
+      game.declareUno(currentPlayer.id);
       io.to(roomCode).emit(SERVER_EVENTS.UNO_DECLARED, { playerId: currentPlayer.id });
     }
 
-    const result = room.game.playCard(currentPlayer.id, action.cardId!, chosenColor);
-    if (result.success) {
+    const result = game.playCard(currentPlayer.id, action.cardId!, chosenColor);
+    if (!result.success) {
+      // Bot made an invalid move — draw instead so the game can never stall
+      console.warn(`[Bot] ${currentPlayer.name} invalid play (${result.error}) — drawing`);
+      game.drawCard(currentPlayer.id);
+    } else {
       // playCard() mutates turnState — re-read it to check if color choice is needed
-      const currentTurnState = room.game.turnState as string;
+      const currentTurnState = game.turnState as string;
       if (currentTurnState === TurnState.AWAITING_COLOR) {
         const color = bot.chooseColor();
-        room.game.chooseColor(currentPlayer.id, color);
+        game.chooseColor(currentPlayer.id, color);
       }
-      checkRoundEnd(io, roomCode);
-      emitGameState(io, roomCode);
+      // Swap state can be entered directly or after color choice
+      if ((game.turnState as TurnState) === TurnState.AWAITING_SWAP) {
+        game.swapHands(currentPlayer.id, bot.chooseSwapTarget());
+      }
     }
+    checkRoundEnd(io, roomCode);
+    emitGameState(io, roomCode);
   } else {
-    const result = room.game.drawCard(currentPlayer.id);
+    const result = game.drawCard(currentPlayer.id);
     if (result.success && result.canPlay && result.card) {
       setTimeout(() => {
-        if (!room.game) return;
-        room.game.playDrawnCard(currentPlayer.id, true);
+        if (!game) return;
+        game.playDrawnCard(currentPlayer.id, true);
+        // Drawn wilds still need a color
+        if ((game.turnState as TurnState) === TurnState.AWAITING_COLOR) {
+          game.chooseColor(currentPlayer.id, bot.chooseColor());
+        }
         checkRoundEnd(io, roomCode);
         emitGameState(io, roomCode);
       }, 1000);
@@ -174,6 +250,26 @@ function checkRoundEnd(io: Server, roomCode: string) {
     });
     room.status = RoomStatus.GAME_ENDED;
   }
+}
+
+function emitGameStarted(io: Server, roomCode: string) {
+  const room = roomManager.getRoom(roomCode);
+  if (!room || !room.game) return;
+
+  const publicState = room.game.getPublicState();
+  publicState.roomCode = roomCode;
+
+  for (const p of room.players) {
+    const sid = playerSocketMap.get(p.id);
+    if (sid && !p.isBot) {
+      io.to(sid).emit(SERVER_EVENTS.GAME_STARTED, {
+        gameState: publicState,
+        hand: p.hand,
+      });
+    }
+  }
+
+  scheduleBot(io, roomCode);
 }
 
 // ============================================================
@@ -311,27 +407,85 @@ export function registerSocketHandlers(io: Server) {
         return;
       }
 
-      const game = room.startGame();
-      const publicState = game.getPublicState();
-      publicState.roomCode = room.code;
+      room.startGame();
+      emitGameStarted(io, room.code);
+    }));
 
-      for (const p of room.players) {
-        const sid = playerSocketMap.get(p.id);
-        if (sid && !p.isBot) {
-          io.to(sid).emit(SERVER_EVENTS.GAME_STARTED, {
-            gameState: publicState,
-            hand: p.hand,
-          });
-        }
+    // ---- Next Round (host only) ----
+    socket.on(CLIENT_EVENTS.NEXT_ROUND, withRateLimit((data: NextRoundPayload) => {
+      const playerId = socketPlayerMap.get(socket.id);
+      if (!playerId) return;
+
+      const room = roomManager.getRoom(data.roomCode);
+      if (!room || !room.game) return;
+      if (room.hostId !== playerId) {
+        socket.emit(SERVER_EVENTS.ERROR, { message: 'Only the host can start the next round' });
+        return;
+      }
+      if (room.game.phase !== GamePhase.ROUND_OVER) {
+        socket.emit(SERVER_EVENTS.ERROR, { message: 'No finished round to continue' });
+        return;
       }
 
-      // Handle first-card effects that need player input
-      if (game.turnState === TurnState.AWAITING_COLOR) {
-        // First card is Wild — current player needs to choose color
-        // Will be handled by CHOOSE_COLOR event
+      room.startNextRound();
+      emitGameStarted(io, room.code);
+    }));
+
+    // ---- Play Again (host only, after game over) ----
+    socket.on(CLIENT_EVENTS.PLAY_AGAIN, withRateLimit((data: PlayAgainPayload) => {
+      const playerId = socketPlayerMap.get(socket.id);
+      if (!playerId) return;
+
+      const room = roomManager.getRoom(data.roomCode);
+      if (!room || !room.game) return;
+      if (room.hostId !== playerId) {
+        socket.emit(SERVER_EVENTS.ERROR, { message: 'Only the host can start a new game' });
+        return;
+      }
+      if (room.game.phase !== GamePhase.GAME_OVER) {
+        socket.emit(SERVER_EVENTS.ERROR, { message: 'Game is not over' });
+        return;
       }
 
-      scheduleBot(io, room.code);
+      room.game.resetForNewGame();
+      room.status = RoomStatus.PLAYING;
+      emitGameStarted(io, room.code);
+    }));
+
+    // ---- Swap Hands (Swap Hands card / 7-0 rule) ----
+    socket.on(CLIENT_EVENTS.SWAP_HANDS, withRateLimit((data: SwapHandsPayload) => {
+      const playerId = socketPlayerMap.get(socket.id);
+      if (!playerId) return;
+
+      const room = roomManager.getRoom(data.roomCode);
+      if (!room || !room.game) return;
+
+      const result = room.game.swapHands(playerId, data.targetPlayerId);
+      if (!result.success) {
+        socket.emit(SERVER_EVENTS.ERROR, { message: result.error || 'Cannot swap hands' });
+        return;
+      }
+
+      checkRoundEnd(io, data.roomCode);
+      emitGameState(io, data.roomCode);
+    }));
+
+    // ---- Jump-In (play exact match out of turn) ----
+    socket.on(CLIENT_EVENTS.JUMP_IN, withRateLimit((data: JumpInPayload) => {
+      const playerId = socketPlayerMap.get(socket.id);
+      if (!playerId) return;
+
+      const room = roomManager.getRoom(data.roomCode);
+      if (!room || !room.game) return;
+
+      const result = room.game.jumpInPlay(playerId, data.cardId);
+      if (!result.success) {
+        socket.emit(SERVER_EVENTS.ERROR, { message: result.error || 'Cannot jump in' });
+        return;
+      }
+
+      checkRoundEnd(io, data.roomCode);
+      emitGameState(io, data.roomCode);
     }));
 
     // ---- Play Card ----

@@ -3,6 +3,8 @@ import { StyleSheet, View, Text, Pressable, Modal, ScrollView } from 'react-nati
 import Animated, { FadeIn, ZoomIn, BounceIn } from 'react-native-reanimated';
 import { Colors } from '../../constants/colors';
 import { PlayerGameState } from '@uno/shared';
+import ConfettiBurst from '../ui/ConfettiBurst';
+import CountUp from '../ui/CountUp';
 
 interface FinalWinnerModalProps {
   visible: boolean;
@@ -23,6 +25,7 @@ export default function FinalWinnerModal({
   return (
     <Modal transparent animationType="fade" visible={visible}>
       <Animated.View entering={FadeIn.duration(300)} style={styles.overlay}>
+        <ConfettiBurst burstKey={winnerName ?? 'game'} count={44} />
         <Animated.View entering={ZoomIn.duration(500)} style={styles.modal}>
           {/* Trophy */}
           <Animated.Text entering={BounceIn.delay(300)} style={styles.trophy}>🏆</Animated.Text>
@@ -38,9 +41,7 @@ export default function FinalWinnerModal({
                 </Text>
                 <Text style={styles.avatar}>{p.avatar}</Text>
                 <Text style={[styles.name, { flex: 1 }]}>{p.name}</Text>
-                <Text style={[styles.score, i === 0 && styles.winnerScore]}>
-                  {scores[p.id] || 0}
-                </Text>
+                <CountUp value={scores[p.id] || 0} duration={900} style={[styles.score, i === 0 && styles.winnerScore]} />
               </View>
             ))}
           </ScrollView>

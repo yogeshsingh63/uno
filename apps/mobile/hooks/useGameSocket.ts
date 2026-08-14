@@ -3,7 +3,8 @@ import { useRouter } from 'expo-router';
 import { socketService } from '../services/socketService';
 import { useGameStore } from '../stores/gameStore';
 import { usePlayerStore } from '../stores/playerStore';
-import { SERVER_EVENTS, CLIENT_EVENTS } from '@uno/shared';
+import { SERVER_EVENTS, CLIENT_EVENTS, GameActionType } from '@uno/shared';
+import { soundService } from '../services/soundService';
 import {
   RoomCreatedPayload, RoomJoinedPayload, GameStartedPayload,
   GameStateUpdatePayload, CardDrawnPayload, RoundEndedPayload,
@@ -38,7 +39,13 @@ export function useGameSocket() {
     const checkMyTurn = (gs: PublicGameState) => {
       const currentId = gs.players[gs.currentPlayerIndex]?.id;
       const myId = playerIdRef.current;
-      store.getState().setIsMyTurn(currentId === myId);
+      const wasMyTurn = store.getState().isMyTurn;
+      const isMyTurn = currentId === myId;
+      store.getState().setIsMyTurn(isMyTurn);
+      // Gentle ping when the turn lands on me (fires often → quiet, debounced)
+      if (isMyTurn && !wasMyTurn && store.getState().gameState) {
+        soundService.play('turn');
+      }
     };
 
     // ---- Room Events ----
@@ -63,26 +70,79 @@ export function useGameSocket() {
     });
 
     socket.on(SERVER_EVENTS.PLAYER_JOINED, (data: { player: { name: string } }) => {
+      soundService.play('pop');
       store.getState().addToast({ message: `${data.player.name} joined!`, type: 'info' });
     });
 
     socket.on(SERVER_EVENTS.PLAYER_LEFT, (data: { playerId: string }) => {
+      soundService.play('pop');
       store.getState().addToast({ message: `A player left the room`, type: 'info' });
     });
 
     // ---- Game Lifecycle ----
     socket.on(SERVER_EVENTS.GAME_STARTED, (data: GameStartedPayload) => {
-      store.getState().setGameState(data.gameState);
-      store.getState().setMyHand(data.hand);
+      const s = store.getState();
+      s.setGameState(data.gameState);
+      s.setMyHand(data.hand);
       checkMyTurn(data.gameState);
+      s.setShowEndRoundModal(false);
+      s.setShowFinalWinnerModal(false);
+      s.setShowSwapModal(false);
+      s.setShowColorPicker(false);
+      s.setShowChallengeModal(false);
+      s.setDrawnCard(null, false);
       router.push(`/game/${data.gameState.roomCode}`);
     });
 
     socket.on(SERVER_EVENTS.GAME_STATE_UPDATE, (data: GameStateUpdatePayload) => {
       const s = store.getState();
+      const prev = s.gameState;
+      const action = data.action;
+      const actionType = action?.type;
+      const newState = data.gameState;
+
+      // ---- Special-card moments (computed from prev/next turn context) ----
+      if (action && prev) {
+        const players = newState.players;
+        const n = players.length;
+        const wrap = (i: number) => ((i % n) + n) % n;
+        const prevIndex = prev.currentPlayerIndex;
+        const prevDir = prev.direction;
+        if (actionType === GameActionType.SKIP && n > 2) {
+          // The victim is the player who was next in the old direction
+          const victim = players[wrap(prevIndex + prevDir)];
+          if (victim) s.addEffect({ kind: 'skip', playerId: victim.id });
+        } else if (actionType === GameActionType.DRAW_TWO) {
+          const victim = players[newState.currentPlayerIndex];
+          if (victim) s.addEffect({ kind: 'hit', playerId: victim.id });
+        } else if (
+          actionType === GameActionType.WILD_DRAW_FOUR_PLAYED &&
+          newState.turnState === TurnState.AWAITING_CHALLENGE
+        ) {
+          // WD4 landed: the current player is the one who must draw 4
+          const victim = players[newState.currentPlayerIndex];
+          if (victim) s.addEffect({ kind: 'hit', playerId: victim.id });
+        } else if (actionType === GameActionType.COLOR_CHOSEN && action.color) {
+          s.addEffect({ kind: 'splash', color: action.color });
+        }
+      }
+
       s.setGameState(data.gameState);
       s.setMyHand(data.hand);
       checkMyTurn(data.gameState);
+
+      // Sound feedback based on the latest action
+      if (actionType && [
+        GameActionType.CARD_PLAYED, GameActionType.DRAW_TWO, GameActionType.WILD_PLAYED,
+        GameActionType.WILD_DRAW_FOUR_PLAYED, GameActionType.SWAP_HANDS_PLAYED,
+        GameActionType.SHUFFLE_HANDS_PLAYED, GameActionType.SKIP, GameActionType.JUMP_IN_PLAYED,
+      ].includes(actionType)) {
+        soundService.play('play');
+      } else if (actionType === GameActionType.REVERSE) {
+        soundService.play('reverse');
+      } else if (actionType === GameActionType.CARD_DRAWN || actionType === GameActionType.CARDS_DRAWN_PENALTY) {
+        soundService.play('draw');
+      }
 
       const myId = playerIdRef.current;
 
@@ -106,6 +166,16 @@ export function useGameSocket() {
         s.setShowChallengeModal(false);
       }
 
+      // Handle swap modal (Swap Hands card / 7-0 rule)
+      if (data.gameState.turnState === TurnState.AWAITING_SWAP) {
+        const currentId = data.gameState.players[data.gameState.currentPlayerIndex]?.id;
+        if (currentId === myId) {
+          s.setShowSwapModal(true);
+        }
+      } else {
+        s.setShowSwapModal(false);
+      }
+
       // Clear drawn card state on new turn
       if (data.gameState.turnState === TurnState.AWAITING_PLAY) {
         s.setDrawnCard(null, false);
@@ -115,6 +185,11 @@ export function useGameSocket() {
     // ---- Card Events ----
     socket.on(SERVER_EVENTS.CARD_DRAWN, (data: CardDrawnPayload) => {
       store.getState().setMyHand(data.hand);
+      soundService.play('draw');
+      // Trigger the fly-to-hand animation for the newly drawn card
+      if (data.card) {
+        store.getState().recordDraw(data.card);
+      }
       if (data.canPlay && data.card) {
         store.getState().setDrawnCard(data.card, true);
       } else {
@@ -126,12 +201,15 @@ export function useGameSocket() {
     socket.on(SERVER_EVENTS.UNO_DECLARED, (data: UnoDeclaredPayload) => {
       const gs = store.getState().gameState;
       const playerName = gs?.players.find(p => p.id === data.playerId)?.name || 'Player';
+      soundService.play('uno');
       store.getState().addToast({ message: `📣 ${playerName} said UNO!`, type: 'uno' });
     });
 
     socket.on(SERVER_EVENTS.UNO_CAUGHT, (data: UnoCaughtPayload) => {
       const gs = store.getState().gameState;
       const targetName = gs?.players.find(p => p.id === data.targetPlayerId)?.name || 'Player';
+      soundService.play('caught');
+      store.getState().addEffect({ kind: 'caught', playerId: data.targetPlayerId });
       store.getState().addToast({ message: `🚨 ${targetName} was CAUGHT! +2 cards`, type: 'warning' });
     });
 
@@ -146,10 +224,12 @@ export function useGameSocket() {
 
     // ---- Round/Game End ----
     socket.on(SERVER_EVENTS.ROUND_ENDED, (data: RoundEndedPayload) => {
+      soundService.play('win');
       store.getState().setRoundEnd(data.winnerId, data.winnerName, data.cumulativeScores);
     });
 
     socket.on(SERVER_EVENTS.GAME_ENDED, (data: GameEndedPayload) => {
+      soundService.play('win');
       store.getState().setGameEnd(data.winnerId, data.winnerName, data.finalScores);
     });
 
@@ -182,6 +262,7 @@ export function useGameSocket() {
 
     // ---- Error ----
     socket.on(SERVER_EVENTS.ERROR, (data: { message: string }) => {
+      soundService.play('error');
       console.warn('[Game Error]', data.message);
       store.getState().addToast({ message: data.message, type: 'error' });
     });
@@ -280,6 +361,27 @@ export function useGameSocket() {
     router.replace('/home');
   }, []);
 
+  const nextRound = useCallback(() => {
+    const rc = store.getState().roomCode;
+    if (rc) socketService.emit(CLIENT_EVENTS.NEXT_ROUND, { roomCode: rc });
+  }, []);
+
+  const playAgain = useCallback(() => {
+    const rc = store.getState().roomCode;
+    if (rc) socketService.emit(CLIENT_EVENTS.PLAY_AGAIN, { roomCode: rc });
+  }, []);
+
+  const swapHands = useCallback((targetPlayerId: string) => {
+    const rc = store.getState().roomCode;
+    if (rc) socketService.emit(CLIENT_EVENTS.SWAP_HANDS, { roomCode: rc, targetPlayerId });
+    store.getState().setShowSwapModal(false);
+  }, []);
+
+  const jumpIn = useCallback((cardId: string) => {
+    const rc = store.getState().roomCode;
+    if (rc) socketService.emit(CLIENT_EVENTS.JUMP_IN, { roomCode: rc, cardId });
+  }, []);
+
   const reconnectRoom = useCallback((code: string) => {
     const pId = playerIdRef.current;
     if (code && pId) {
@@ -292,5 +394,6 @@ export function useGameSocket() {
     playCard, drawCard, passTurn, playDrawnCard,
     declareUno, callCatch, challengeDrawFour, acceptDrawFour,
     chooseColor, sendEmoji, addBot, leaveRoom, reconnectRoom,
+    nextRound, playAgain, swapHands, jumpIn,
   };
 }

@@ -50,7 +50,8 @@ export class RoomManager {
     room.removePlayer(playerId);
     this.playerRooms.delete(playerId);
 
-    if (room.players.length === 0) {
+    // If no players remain (or only bots), tear the room down
+    if (room.players.length === 0 || room.players.every(p => p.isBot)) {
       this.rooms.delete(code);
       this.clearDestroyTimer(code);
       return { room, removed: true, roomDeleted: true };

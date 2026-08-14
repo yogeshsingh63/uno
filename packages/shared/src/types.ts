@@ -20,6 +20,8 @@ export enum CardType {
   DRAW_TWO = 'DRAW_TWO',
   WILD = 'WILD',
   WILD_DRAW_FOUR = 'WILD_DRAW_FOUR',
+  SWAP_HANDS = 'SWAP_HANDS',
+  SHUFFLE_HANDS = 'SHUFFLE_HANDS',
 }
 
 export interface Card {
@@ -97,6 +99,7 @@ export enum TurnState {
   DREW_CARD = 'DREW_CARD',
   AWAITING_COLOR = 'AWAITING_COLOR',
   AWAITING_CHALLENGE = 'AWAITING_CHALLENGE',
+  AWAITING_SWAP = 'AWAITING_SWAP',
 }
 
 export enum GamePhase {
@@ -115,6 +118,13 @@ export interface ChallengeData {
   wasLegal: boolean;            // snapshot: was WD4 legal at play time
   declaredColor: CardColor;     // color chosen
   timeoutAt: number;            // unix ms
+}
+
+export interface JumpInInfo {
+  signature: string;       // `${color}:${type}:${value}` exact-match signature
+  playedBy: string;        // player who opened the window
+  openedAt: number;        // unix ms
+  expiresAt: number;       // unix ms
 }
 
 export interface PublicGameState {
@@ -139,6 +149,8 @@ export interface PublicGameState {
     targetPlayerId: string;
     timeoutAt: number;
   } | null;
+  jumpIn: JumpInInfo | null;           // open jump-in window (house rule)
+  swapOptions: string[] | null;        // candidate player ids for AWAITING_SWAP
   settings: RoomSettings;
 }
 
@@ -163,6 +175,9 @@ export enum GameActionType {
   DRAW_PILE_RESHUFFLED = 'DRAW_PILE_RESHUFFLED',
   HAND_SWAPPED = 'HAND_SWAPPED',
   HANDS_ROTATED = 'HANDS_ROTATED',
+  SWAP_HANDS_PLAYED = 'SWAP_HANDS_PLAYED',
+  SHUFFLE_HANDS_PLAYED = 'SHUFFLE_HANDS_PLAYED',
+  JUMP_IN_PLAYED = 'JUMP_IN_PLAYED',
 }
 
 export interface GameAction {
@@ -231,6 +246,17 @@ export interface AcceptWd4Payload {
   roomCode: string;
 }
 
+export interface SwapHandsPayload {
+  roomCode: string;
+  targetPlayerId: string;
+}
+
+export interface JumpInPayload {
+  roomCode: string;
+  cardId: string;
+  declaredColor?: CardColor;
+}
+
 export interface ChallengeUnoPayload {
   roomCode: string;
   targetPlayerId: string;
@@ -246,6 +272,14 @@ export interface ChooseColorPayload {
 }
 
 export interface StartGamePayload {
+  roomCode: string;
+}
+
+export interface NextRoundPayload {
+  roomCode: string;
+}
+
+export interface PlayAgainPayload {
   roomCode: string;
 }
 
@@ -381,7 +415,8 @@ export interface ErrorPayload {
 
 export function isCardPlayable(card: Card, topCard: Card, activeColor: CardColor): boolean {
   // Wild cards are always playable
-  if (card.type === CardType.WILD || card.type === CardType.WILD_DRAW_FOUR) return true;
+  if (card.type === CardType.WILD || card.type === CardType.WILD_DRAW_FOUR ||
+      card.type === CardType.SWAP_HANDS || card.type === CardType.SHUFFLE_HANDS) return true;
   // Match by color (using activeColor, not topCard.color)
   if (card.color === activeColor) return true;
   // Match by number value
@@ -399,6 +434,8 @@ export function getCardPointValue(type: CardType, value?: number): number {
     case CardType.DRAW_TWO: return 20;
     case CardType.WILD:
     case CardType.WILD_DRAW_FOUR: return 50;
+    case CardType.SWAP_HANDS:
+    case CardType.SHUFFLE_HANDS: return 40;
     default: return 0;
   }
 }

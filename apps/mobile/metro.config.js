@@ -9,6 +9,9 @@ const config = getDefaultConfig(projectRoot);
 // Watch the shared package
 config.watchFolders = [workspaceRoot];
 
+// Bundle .wav sound assets
+config.resolver.assetExts = [...config.resolver.assetExts, 'wav'];
+
 // Let Metro find packages in the workspace root
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

@@ -4,7 +4,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, {
-  useAnimatedStyle, withRepeat, withTiming, useSharedValue, withSequence,
+  useAnimatedStyle, withRepeat, withTiming, useSharedValue, withSequence, withSpring,
 } from 'react-native-reanimated';
 import { Card as CardType, CardColor } from '@uno/shared';
 import CardComponent from './Card';
@@ -17,10 +17,13 @@ interface DiscardPileProps {
   topCard: CardType | null;
   currentColor: CardColor;
   previousCard?: CardType | null;
+  cardWidth?: number;
+  cardHeight?: number;
 }
 
-function DiscardPile({ topCard, currentColor, previousCard }: DiscardPileProps) {
+function DiscardPile({ topCard, currentColor, previousCard, cardWidth = DISCARD_WIDTH, cardHeight = DISCARD_HEIGHT }: DiscardPileProps) {
   const glowOpacity = useSharedValue(0.4);
+  const pop = useSharedValue(1);
   const colorHex = getCardColorHex(currentColor);
 
   React.useEffect(() => {
@@ -32,38 +35,48 @@ function DiscardPile({ topCard, currentColor, previousCard }: DiscardPileProps) 
     );
   }, [currentColor]);
 
+  // Spring-pop the pile whenever a new card lands on top
+  React.useEffect(() => {
+    pop.value = 0.86;
+    pop.value = withSpring(1, { damping: 13, stiffness: 240 });
+  }, [topCard?.id]);
+
   const glowStyle = useAnimatedStyle(() => ({
     shadowOpacity: glowOpacity.value,
   }));
 
+  const popStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pop.value }],
+  }));
+
   if (!topCard) {
     return (
-      <View style={styles.emptyPile}>
+      <View style={[styles.emptyPile, { width: cardWidth, height: cardHeight }]}>
         <Text style={styles.emptyText}>Discard</Text>
       </View>
     );
   }
 
   return (
-    <Animated.View style={[styles.container, glowStyle, { shadowColor: colorHex }]}>
+    <Animated.View style={[styles.container, glowStyle, popStyle, { shadowColor: colorHex, width: cardWidth + 20, height: cardHeight + 20 }]}>
       {/* Layer 1: Previous-previous card (barely visible) */}
       <View style={[styles.layer, styles.layer1]}>
-        <CardBack width={DISCARD_WIDTH - 6} height={DISCARD_HEIGHT - 6} borderRadius={9} />
+        <CardBack width={cardWidth - 6} height={cardHeight - 6} borderRadius={9} />
       </View>
 
       {/* Layer 2: Previous card */}
       <View style={[styles.layer, styles.layer2]}>
         {previousCard ? (
-          <CardComponent card={previousCard} disabled size="discard" />
+          <CardComponent card={previousCard} disabled size="discard" cardWidth={cardWidth - 2} cardHeight={cardHeight - 2} />
         ) : (
-          <CardBack width={DISCARD_WIDTH - 4} height={DISCARD_HEIGHT - 4} borderRadius={9} />
+          <CardBack width={cardWidth - 4} height={cardHeight - 4} borderRadius={9} />
         )}
       </View>
 
       {/* Color ring */}
       <View style={[styles.colorRing, {
-        width: DISCARD_WIDTH + 12,
-        height: DISCARD_HEIGHT + 12,
+        width: cardWidth + 12,
+        height: cardHeight + 12,
         borderRadius: 14,
         borderColor: colorHex,
       }]} />
@@ -74,6 +87,8 @@ function DiscardPile({ topCard, currentColor, previousCard }: DiscardPileProps) 
           card={topCard}
           disabled
           size="discard"
+          cardWidth={cardWidth}
+          cardHeight={cardHeight}
           declaredColor={
             topCard.color === 'WILD' ? currentColor : undefined
           }
@@ -85,8 +100,6 @@ function DiscardPile({ topCard, currentColor, previousCard }: DiscardPileProps) 
 
 const styles = StyleSheet.create({
   container: {
-    width: DISCARD_WIDTH + 20,
-    height: DISCARD_HEIGHT + 20,
     justifyContent: 'center',
     alignItems: 'center',
     shadowOffset: { width: 0, height: 0 },

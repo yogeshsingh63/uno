@@ -68,7 +68,7 @@ class SocketService {
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
     });
 
     this.socket.on('connect', () => {

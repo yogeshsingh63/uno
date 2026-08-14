@@ -1,18 +1,33 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withTiming, withSequence, withSpring, Easing,
+} from 'react-native-reanimated';
 import { PlayDirection } from '@uno/shared';
 import { Colors } from '../../constants/colors';
 
 interface DirectionArrowProps {
   direction: PlayDirection;
+  style?: any;
 }
 
-export default function DirectionArrow({ direction }: DirectionArrowProps) {
+export default function DirectionArrow({ direction, style }: DirectionArrowProps) {
   const rotation = useSharedValue(0);
+  const lastDir = React.useRef<PlayDirection>(direction);
 
   React.useEffect(() => {
-    rotation.value = withSpring(direction === 1 ? 0 : 180);
+    if (lastDir.current !== direction) {
+      // Full 360 swoosh in the new direction, then settle on the glyph flip
+      const spin = direction === 1 ? -360 : 360;
+      rotation.value = withSequence(
+        withTiming(rotation.value + spin, {
+          duration: 440,
+          easing: Easing.inOut(Easing.cubic),
+        }),
+        withSpring(direction === 1 ? 0 : 180, { damping: 16, stiffness: 200 }),
+      );
+      lastDir.current = direction;
+    }
   }, [direction]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -20,7 +35,7 @@ export default function DirectionArrow({ direction }: DirectionArrowProps) {
   }));
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View style={[styles.container, animatedStyle, style]}>
       <Text style={styles.arrow}>↻</Text>
       <Text style={styles.label}>{direction === 1 ? 'CW' : 'CCW'}</Text>
     </Animated.View>

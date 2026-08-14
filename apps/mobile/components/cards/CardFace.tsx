@@ -9,6 +9,8 @@ import ReverseCard from './ReverseCard';
 import DrawTwoCard from './DrawTwoCard';
 import WildCard from './WildCard';
 import WildDrawFourCard from './WildDrawFourCard';
+import SwapHandsCard from './SwapHandsCard';
+import ShuffleHandsCard from './ShuffleHandsCard';
 
 interface CardFaceProps {
   type: string;        // CardType enum value
@@ -85,6 +87,26 @@ function CardFace({
           borderRadius={borderRadius}
           declaredColor={declaredColor}
           challengePending={challengePending}
+        />
+      );
+
+    case CType.SWAP_HANDS:
+      return (
+        <SwapHandsCard
+          width={width}
+          height={height}
+          borderRadius={borderRadius}
+          declaredColor={declaredColor}
+        />
+      );
+
+    case CType.SHUFFLE_HANDS:
+      return (
+        <ShuffleHandsCard
+          width={width}
+          height={height}
+          borderRadius={borderRadius}
+          declaredColor={declaredColor}
         />
       );
 

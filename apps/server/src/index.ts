@@ -5,7 +5,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { registerSocketHandlers } from './socket/handlers';
 
-dotenv.config();
+// Prefer the .env file over inherited shell env vars (e.g. a stray PORT).
+dotenv.config({ override: true });
 
 const app = express();
 const server = http.createServer(app);

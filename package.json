@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "install:all": "cd packages/shared && npm install && npm run build && cd ../server && npm install && cd ../mobile && npm install",
     "server:dev": "cd apps/server && npm run dev",
     "server:build": "cd apps/server && npm run build",
+    "server:test": "cd apps/server && npm test",
+    "shared:build": "cd packages/shared && npm run build",
     "mobile:start": "cd apps/mobile && npx expo start",
     "mobile:ios": "cd apps/mobile && npx expo start --ios",
     "mobile:android": "cd apps/mobile && npx expo start --android",

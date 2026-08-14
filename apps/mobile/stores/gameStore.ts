@@ -23,9 +23,14 @@ interface HandSlice {
   drawnCard: Card | null;
   canPlayDrawnCard: boolean;
   canCallUno: boolean;
+  /** Increments on every draw so the UI can replay the fly-to-hand animation */
+  lastDrawSeq: number;
+  lastDrawCard: Card | null;
 
   setMyHand: (hand: Card[]) => void;
   setDrawnCard: (card: Card | null, canPlay: boolean) => void;
+  recordDraw: (card: Card) => void;
+  clearDraw: () => void;
 }
 
 // ---- UI Slice ----
@@ -36,23 +41,36 @@ interface Toast {
   duration?: number;
 }
 
+/** Transient, targeted motion effects (skip X-flash, +2/+4 hit, caught, color splash). */
+export interface TableEffect {
+  id: string;
+  kind: 'skip' | 'hit' | 'caught' | 'splash';
+  playerId?: string;
+  color?: CardColor;
+}
+
 interface UISlice {
   isMyTurn: boolean;
   showColorPicker: boolean;
   showChallengeModal: boolean;
+  showSwapModal: boolean;
   showEndRoundModal: boolean;
   showFinalWinnerModal: boolean;
   toasts: Toast[];
   emojiReactions: { playerId: string; emoji: string; id: string }[];
+  effects: TableEffect[];
 
   setIsMyTurn: (isMyTurn: boolean) => void;
   setShowColorPicker: (show: boolean) => void;
   setShowChallengeModal: (show: boolean) => void;
+  setShowSwapModal: (show: boolean) => void;
   setShowEndRoundModal: (show: boolean) => void;
   setShowFinalWinnerModal: (show: boolean) => void;
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
   addEmojiReaction: (playerId: string, emoji: string) => void;
+  addEffect: (effect: Omit<TableEffect, 'id'>) => void;
+  removeEffect: (id: string) => void;
 }
 
 // ---- Round/Game End Slice ----
@@ -93,25 +111,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
   drawnCard: null,
   canPlayDrawnCard: false,
   canCallUno: false,
+  lastDrawSeq: 0,
+  lastDrawCard: null,
 
   setMyHand: (hand) => set({
     myHand: hand,
     canCallUno: hand.length === 2,
   }),
   setDrawnCard: (card, canPlay) => set({ drawnCard: card, canPlayDrawnCard: canPlay }),
+  recordDraw: (card) => set((s) => ({
+    lastDrawCard: card,
+    lastDrawSeq: s.lastDrawSeq + 1,
+  })),
+  clearDraw: () => set({ lastDrawCard: null }),
 
   // ---- UI Slice ----
   isMyTurn: false,
   showColorPicker: false,
   showChallengeModal: false,
+  showSwapModal: false,
   showEndRoundModal: false,
   showFinalWinnerModal: false,
   toasts: [],
   emojiReactions: [],
+  effects: [],
 
   setIsMyTurn: (isMyTurn) => set({ isMyTurn }),
   setShowColorPicker: (show) => set({ showColorPicker: show }),
   setShowChallengeModal: (show) => set({ showChallengeModal: show }),
+  setShowSwapModal: (show) => set({ showSwapModal: show }),
   setShowEndRoundModal: (show) => set({ showEndRoundModal: show }),
   setShowFinalWinnerModal: (show) => set({ showFinalWinnerModal: show }),
 
@@ -139,6 +167,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }));
     }, 1500);
   },
+  addEffect: (effect) => {
+    const id = `fx-${++toastCounter}`;
+    const life = effect.kind === 'splash' ? 650 : effect.kind === 'hit' ? 750 : 950;
+    set((state) => ({
+      effects: [...state.effects, { ...effect, id }],
+    }));
+    setTimeout(() => {
+      set((state) => ({
+        effects: state.effects.filter(e => e.id !== id),
+      }));
+    }, life);
+  },
+  removeEffect: (id) => set((state) => ({
+    effects: state.effects.filter(e => e.id !== id),
+  })),
 
   // ---- End Slice ----
   roundWinnerId: null,
@@ -169,16 +212,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     canCallUno: false,
     showColorPicker: false,
     showChallengeModal: false,
+    showSwapModal: false,
     showEndRoundModal: false,
     showFinalWinnerModal: false,
     drawnCard: null,
     canPlayDrawnCard: false,
+    lastDrawSeq: 0,
+    lastDrawCard: null,
     roundWinnerId: null,
     roundWinnerName: null,
     gameWinnerId: null,
     gameWinnerName: null,
     toasts: [],
     emojiReactions: [],
+    effects: [],
   }),
 
   resetAll: () => set({
@@ -191,10 +238,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     canCallUno: false,
     showColorPicker: false,
     showChallengeModal: false,
+    showSwapModal: false,
     showEndRoundModal: false,
     showFinalWinnerModal: false,
     drawnCard: null,
     canPlayDrawnCard: false,
+    lastDrawSeq: 0,
+    lastDrawCard: null,
     roundWinnerId: null,
     roundWinnerName: null,
     cumulativeScores: {},
@@ -203,5 +253,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     finalScores: {},
     toasts: [],
     emojiReactions: [],
+    effects: [],
   }),
 }));

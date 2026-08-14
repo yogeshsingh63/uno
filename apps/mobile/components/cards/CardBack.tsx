@@ -1,9 +1,11 @@
 // ============================================================
-// CardBack — Face-down card design (Section 3)
+// CardBack — Premium UNO card back
+// Deep crimson-to-black face, cream border, tilted oval
+// with bold UNO wordmark, and warm corner accents.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { CARD_BACK_BG, CARD_COLORS } from '../../constants/cardColors';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface CardBackProps {
   width: number;
@@ -11,44 +13,59 @@ interface CardBackProps {
   borderRadius?: number;
 }
 
-function CardBack({ width, height, borderRadius = 10 }: CardBackProps) {
-  const rectW = width * 0.58;
-  const rectH = height * 0.68;
-  const fontSize = height * 0.26;
-  const dotSize = Math.max(3, width * 0.04);
-  const dotInset = Math.max(5, width * 0.1);
+function CardBack({ width, height, borderRadius = 12 }: CardBackProps) {
+  const ovalW = width * 0.70;
+  const ovalH = height * 0.46;
+  const ovalRadius = ovalH / 2;
+  const fontSize = ovalH * 0.46;
+  const dotSize = Math.max(3, width * 0.045);
+  const dotInset = Math.max(7, width * 0.12);
 
   return (
-    <View style={[styles.card, { width, height, borderRadius, backgroundColor: CARD_BACK_BG }]}>
-      {/* Outer red border */}
-      <View style={[styles.outerBorder, {
-        width: width - 4, height: height - 4,
-        borderRadius: borderRadius - 1,
-        borderColor: CARD_COLORS.RED,
-      }]}>
-        {/* Inner faded red border */}
-        <View style={[styles.innerBorder, {
-          width: width - 12, height: height - 12,
-          borderRadius: borderRadius - 3,
-        }]} />
+    <View style={[styles.card, { width, height, borderRadius }]}>
+      <LinearGradient
+        colors={['#C41230', '#8B0D20', '#3A0610']}
+        start={{ x: 0.2, y: 0 }}
+        end={{ x: 0.8, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Warm gloss sweep */}
+      <LinearGradient
+        colors={['rgba(255,240,220,0.30)', 'rgba(255,240,220,0.06)', 'rgba(0,0,0,0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0.7 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
+      {/* Bottom depth */}
+      <LinearGradient
+        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']}
+        start={{ x: 0.5, y: 0.5 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
+      {/* Cream tilted oval with UNO mark */}
+      <View style={[styles.oval, { width: ovalW, height: ovalH, borderRadius: ovalRadius }]}>
+        <Text style={[styles.unoText, { fontSize }]}>UNO</Text>
       </View>
 
-      {/* Center tilted rectangle */}
-      <View style={[styles.centerRect, {
-        width: rectW, height: rectH,
-        borderRadius: 6,
-        transform: [{ rotate: '-20deg' }],
-      }]}>
-        <Text style={[styles.unoText, { fontSize }]}>
-          UNO
-        </Text>
-      </View>
-
-      {/* Four corner dots */}
-      <View style={[styles.dot, { width: dotSize, height: dotSize, borderRadius: dotSize / 2, top: dotInset, left: dotInset }]} />
-      <View style={[styles.dot, { width: dotSize, height: dotSize, borderRadius: dotSize / 2, top: dotInset, right: dotInset }]} />
-      <View style={[styles.dot, { width: dotSize, height: dotSize, borderRadius: dotSize / 2, bottom: dotInset, left: dotInset }]} />
-      <View style={[styles.dot, { width: dotSize, height: dotSize, borderRadius: dotSize / 2, bottom: dotInset, right: dotInset }]} />
+      {/* Corner dots */}
+      {(['tl', 'tr', 'bl', 'br'] as const).map((pos) => (
+        <View
+          key={pos}
+          style={[styles.dot, {
+            width: dotSize, height: dotSize, borderRadius: dotSize / 2,
+            ...(pos === 'tl' ? { top: dotInset, left: dotInset }
+              : pos === 'tr' ? { top: dotInset, right: dotInset }
+              : pos === 'bl' ? { bottom: dotInset, left: dotInset }
+              : { bottom: dotInset, right: dotInset }),
+          }]}
+        />
+      ))}
     </View>
   );
 }
@@ -58,46 +75,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: 'rgba(0,0,0,0.45)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 5,
+    borderWidth: 3,
+    borderColor: '#FFF5E6',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 8,
   },
-  outerBorder: {
-    position: 'absolute',
-    borderWidth: 2,
-  },
-  innerBorder: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-    right: 3,
-    bottom: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(229,57,53,0.4)',
-  },
-  centerRect: {
-    backgroundColor: CARD_COLORS.RED,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    justifyContent: 'center',
+  oval: {
+    backgroundColor: '#FFF5E6',
     alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ rotate: '-25deg' }],
+    shadowColor: 'rgba(0,0,0,0.4)',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 4,
   },
   unoText: {
     fontWeight: '900',
     fontStyle: 'italic',
-    color: '#FFD600',
-    textShadowColor: '#000',
+    color: '#8B0D20',
+    textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-    transform: [{ rotate: '0deg' }],
+    textShadowRadius: 2,
   },
   dot: {
     position: 'absolute',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255,245,230,0.7)',
   },
 });
 
