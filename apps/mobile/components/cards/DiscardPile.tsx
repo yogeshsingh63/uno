@@ -4,7 +4,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, {
-  useAnimatedStyle, withRepeat, withTiming, useSharedValue, withSequence, withSpring,
+  useAnimatedStyle, useSharedValue, withSpring,
 } from 'react-native-reanimated';
 import { Card as CardType, CardColor } from '@uno/shared';
 import CardComponent from './Card';
@@ -22,28 +22,14 @@ interface DiscardPileProps {
 }
 
 function DiscardPile({ topCard, currentColor, previousCard, cardWidth = DISCARD_WIDTH, cardHeight = DISCARD_HEIGHT }: DiscardPileProps) {
-  const glowOpacity = useSharedValue(0.4);
   const pop = useSharedValue(1);
   const colorHex = getCardColorHex(currentColor);
 
-  React.useEffect(() => {
-    glowOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.8, { duration: 1000 }),
-        withTiming(0.35, { duration: 1000 }),
-      ), -1, true
-    );
-  }, [currentColor]);
-
-  // Spring-pop the pile whenever a new card lands on top
+  // Spring-pop the pile whenever a new card lands on top (one-shot)
   React.useEffect(() => {
     pop.value = 0.90;
     pop.value = withSpring(1, { damping: 14, stiffness: 220 });
   }, [topCard?.id]);
-
-  const glowStyle = useAnimatedStyle(() => ({
-    shadowOpacity: glowOpacity.value,
-  }));
 
   const popStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pop.value }],
@@ -58,7 +44,7 @@ function DiscardPile({ topCard, currentColor, previousCard, cardWidth = DISCARD_
   }
 
   return (
-    <Animated.View style={[styles.container, glowStyle, popStyle, { shadowColor: colorHex, width: cardWidth, height: cardHeight }]}>
+    <Animated.View style={[styles.container, popStyle, { shadowColor: colorHex, width: cardWidth, height: cardHeight }]}>
       {/* Layer 1: Previous-previous card */}
       <View style={[styles.layer, styles.layer1]}>
         <CardBack width={cardWidth} height={cardHeight} borderRadius={10} />

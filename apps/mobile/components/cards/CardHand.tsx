@@ -3,13 +3,11 @@
 // Deal-in stagger on mount, FLIP-style settle on removal.
 // ============================================================
 import React, { useCallback } from 'react';
-import { StyleSheet, View, FlatList, Text } from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Card as CardType, CardColor, isCardPlayable } from '@uno/shared';
 import CardComponent from './Card';
 import { useResponsive } from '../../hooks/useResponsive';
-import { usePrefersReducedMotion } from '../../constants/motion';
 import { CARD_HAND_OVERLAP } from '../../constants/cardDimensions';
 
 interface CardHandProps {
@@ -22,7 +20,6 @@ interface CardHandProps {
 
 export default function CardHand({ cards, topCard, currentColor, isMyTurn, onPlayCard }: CardHandProps) {
   const { cardW, cardH } = useResponsive();
-  const reduced = usePrefersReducedMotion();
   const n = cards.length;
   const overlap = Math.min(CARD_HAND_OVERLAP, cardW * 0.34);
 
@@ -34,14 +31,8 @@ export default function CardHand({ cards, topCard, currentColor, isMyTurn, onPla
     const rotation = (index - mid) * 2.8;
     const yOffset = Math.abs(index - mid) * 3.5;
 
-    const entering = reduced
-      ? FadeIn.duration(140)
-      : FadeInDown.duration(250).delay(Math.min(index, 8) * 45).springify().damping(16);
-
     return (
-      <Animated.View
-        entering={entering}
-        layout={LinearTransition.duration(220)}
+      <View
         style={{
           marginRight: index < n - 1 ? -overlap : 0,
           transform: [
@@ -59,9 +50,9 @@ export default function CardHand({ cards, topCard, currentColor, isMyTurn, onPla
           cardWidth={cardW}
           cardHeight={cardH}
         />
-      </Animated.View>
+      </View>
     );
-  }, [cards, topCard, currentColor, isMyTurn, onPlayCard, n, cardW, cardH, overlap, reduced]);
+  }, [cards, topCard, currentColor, isMyTurn, onPlayCard, n, cardW, cardH, overlap]);
 
   const getItemLayout = useCallback((_: any, index: number) => ({
     length: cardW - overlap,

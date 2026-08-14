@@ -1,6 +1,7 @@
 // ============================================================
 // CardBack — Official Authentic UNO Card Back
-// Outer white border, solid black body, giant tilted red oval,
+// Outer white border, solid black body, giant tilted red oval
+// (same 33.7 x 55.1 @ +46.4° ellipse as every card face),
 // and the iconic 3D golden-yellow "UNO" wordmark.
 // ============================================================
 import React, { memo } from 'react';
@@ -39,15 +40,15 @@ function CardBack({ width, height, borderRadius = 10 }: CardBackProps) {
         {/* 2. Inner Solid Black Field */}
         <Rect x="4.5" y="4.5" width="91" height="139" rx="6" fill="#0B0B0E" />
 
-        {/* 3. The Iconic Giant Red Filled Oval */}
+        {/* 3. The Iconic Giant Red Filled Oval (touching both side walls) */}
         <G clipPath="url(#cardBackClip)">
           <Ellipse
             cx="50"
             cy="74"
-            rx="36.5"
-            ry="56"
+            rx="33.7"
+            ry="55.1"
             fill="#ED1C24"
-            transform="rotate(-33, 50, 74)"
+            transform="rotate(46.4, 50, 74)"
           />
         </G>
 

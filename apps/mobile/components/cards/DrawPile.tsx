@@ -4,8 +4,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withRepeat, withSequence,
-  withTiming, withSpring,
+  useSharedValue, useAnimatedStyle, withSpring,
 } from 'react-native-reanimated';
 import CardBack from './CardBack';
 import { CARD_WIDTH, CARD_HEIGHT } from '../../constants/cardDimensions';
@@ -24,25 +23,9 @@ interface DrawPileProps {
 
 export default function DrawPile({ count, isMyTurn, onDraw, cardWidth = CARD_WIDTH, cardHeight = CARD_HEIGHT }: DrawPileProps) {
   const scale = useSharedValue(1);
-  const glowOpacity = useSharedValue(0);
-
-  React.useEffect(() => {
-    if (isMyTurn) {
-      glowOpacity.value = withRepeat(
-        withSequence(withTiming(0.6, { duration: 800 }), withTiming(0.2, { duration: 800 })),
-        -1, true
-      );
-    } else {
-      glowOpacity.value = withTiming(0, { duration: 300 });
-    }
-  }, [isMyTurn]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-  }));
-
-  const glowStyle = useAnimatedStyle(() => ({
-    shadowOpacity: glowOpacity.value,
   }));
 
   const handlePress = () => {
@@ -55,7 +38,7 @@ export default function DrawPile({ count, isMyTurn, onDraw, cardWidth = CARD_WID
 
   return (
     <AnimatedPressable onPress={handlePress} style={[animatedStyle]}>
-      <Animated.View style={[styles.container, glowStyle, { width: cardWidth + 6, height: cardHeight + 6 }]}>
+      <View style={[styles.container, { width: cardWidth + 6, height: cardHeight + 6 }]}>
         {/* Stacked card backs for 3D depth */}
         {[2, 1, 0].map((offset) => (
           <View key={offset} style={[styles.stackedCard, {
@@ -83,7 +66,7 @@ export default function DrawPile({ count, isMyTurn, onDraw, cardWidth = CARD_WID
             <Text style={styles.drawText}>DRAW</Text>
           </View>
         )}
-      </Animated.View>
+      </View>
     </AnimatedPressable>
   );
 }

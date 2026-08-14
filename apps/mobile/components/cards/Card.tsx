@@ -6,13 +6,12 @@ import React, { memo, useEffect } from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withSequence,
-  withTiming, withRepeat, interpolate, runOnJS,
+  withTiming, withRepeat,
 } from 'react-native-reanimated';
-import { Card as CardType, CardColor, CardType as CType } from '@uno/shared';
+import { Card as CardType, CardColor } from '@uno/shared';
 import CardFace from './CardFace';
 import CardBack from './CardBack';
 import { Colors } from '../../constants/colors';
-import { CARD_WIDTH, CARD_HEIGHT, CARD_BORDER_RADIUS } from '../../constants/cardDimensions';
 import { SPRING_BOUNCE } from '../../constants/animations';
 import { usePrefersReducedMotion } from '../../constants/motion';
 
@@ -56,7 +55,7 @@ function CardComponent({
   const h = cardHeight ?? Math.round(w * (10 / 7));
   const br = Math.round(w * 0.143); // ~10px at 70w
 
-  // STATE 1 — Playable float animation (single light loop per card)
+  // Playable cards gently float up/down + glow so players see their valid moves
   useEffect(() => {
     if (isPlayable && !faceDown && !disabled) {
       if (!reduced) {
@@ -90,7 +89,7 @@ function CardComponent({
   const handlePress = () => {
     if (disabled || faceDown) return;
 
-    // STATE 2 — Unplayable shake
+    // Unplayable shake (one-shot, no loop)
     if (!isPlayable) {
       translateY.value = withSequence(
         withTiming(-3, { duration: 50 }),
@@ -101,7 +100,7 @@ function CardComponent({
       return;
     }
 
-    // STATE 3 — Selected press
+    // Selected press
     scale.value = withSpring(1.06, SPRING_BOUNCE);
     translateY.value = withSpring(-20, { damping: 12, stiffness: 140 });
 
