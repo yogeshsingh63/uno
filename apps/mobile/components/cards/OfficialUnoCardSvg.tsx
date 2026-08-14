@@ -91,17 +91,17 @@ function OfficialUnoCardSvg({
 
           {/* Wild center 4-color oval clip */}
           <ClipPath id="wildCenterOval">
-            <Ellipse cx="50" cy="74" rx="35" ry="52" transform="rotate(-33, 50, 74)" />
+            <Ellipse cx="50" cy="74" rx="27" ry="42" transform="rotate(-33, 50, 74)" />
           </ClipPath>
 
           {/* Corner Top-Left Mini 4-color oval clip */}
           <ClipPath id="cornerTLOval">
-            <Ellipse cx="23" cy="23" rx="10.5" ry="16" transform="rotate(-33, 23, 23)" />
+            <Ellipse cx="13" cy="19" rx="6.8" ry="10.8" transform="rotate(-33, 13, 19)" />
           </ClipPath>
 
           {/* Corner Bottom-Right Mini 4-color oval clip */}
           <ClipPath id="cornerBROval">
-            <Ellipse cx="77" cy="125" rx="10.5" ry="16" transform="rotate(147, 77, 125)" />
+            <Ellipse cx="87" cy="129" rx="6.8" ry="10.8" transform="rotate(147, 87, 129)" />
           </ClipPath>
         </Defs>
 
@@ -280,7 +280,7 @@ function OfficialUnoCardSvg({
         {/* --- WILD (4-COLOR OVAL) --- */}
         {type === 'WILD' && (
           <G>
-            {/* Center Giant 4-Color Oval */}
+            {/* Center 4-Color Oval */}
             <G clipPath="url(#wildCenterOval)">
               {/* Top-Left Sector: RED */}
               <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#ED3838" />
@@ -295,31 +295,31 @@ function OfficialUnoCardSvg({
             <Ellipse
               cx="50"
               cy="74"
-              rx="35"
-              ry="52"
+              rx="27"
+              ry="42"
               fill="none"
               stroke="#FFFFFF"
-              strokeWidth="4"
+              strokeWidth="3.6"
               transform="rotate(-33, 50, 74)"
             />
 
             {/* Corner Top-Left Mini 4-Color Oval */}
             <G clipPath="url(#cornerTLOval)">
-              <Path d="M 23 23 L 23 0 L 0 0 L 0 23 Z" fill="#ED3838" />
-              <Path d="M 23 23 L 23 0 L 50 0 L 50 23 Z" fill="#3B4BF5" />
-              <Path d="M 23 23 L 0 23 L 0 50 L 12 50 Z" fill="#FFA000" />
-              <Path d="M 23 23 L 50 23 L 50 50 L 12 50 Z" fill="#00A825" />
+              <Path d="M 13 19 L 13 0 L 0 0 L 0 19 Z" fill="#ED3838" />
+              <Path d="M 13 19 L 13 0 L 30 0 L 30 19 Z" fill="#3B4BF5" />
+              <Path d="M 13 19 L 0 19 L 0 40 L 7 40 Z" fill="#FFA000" />
+              <Path d="M 13 19 L 30 19 L 30 40 L 7 40 Z" fill="#00A825" />
             </G>
-            <Ellipse cx="23" cy="23" rx="10.5" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2.2" transform="rotate(-33, 23, 23)" />
+            <Ellipse cx="13" cy="19" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(-33, 13, 19)" />
 
             {/* Corner Bottom-Right Mini 4-Color Oval (Rotated 180°) */}
             <G clipPath="url(#cornerBROval)">
-              <Path d="M 77 125 L 77 148 L 100 148 L 100 125 Z" fill="#ED3838" />
-              <Path d="M 77 125 L 77 148 L 50 148 L 50 125 Z" fill="#3B4BF5" />
-              <Path d="M 77 125 L 100 125 L 100 100 L 88 100 Z" fill="#FFA000" />
-              <Path d="M 77 125 L 50 125 L 50 100 L 88 100 Z" fill="#00A825" />
+              <Path d="M 87 129 L 87 148 L 100 148 L 100 129 Z" fill="#ED3838" />
+              <Path d="M 87 129 L 87 148 L 70 148 L 70 129 Z" fill="#3B4BF5" />
+              <Path d="M 87 129 L 100 129 L 100 110 L 93 110 Z" fill="#FFA000" />
+              <Path d="M 87 129 L 70 129 L 70 110 L 93 110 Z" fill="#00A825" />
             </G>
-            <Ellipse cx="77" cy="125" rx="10.5" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2.2" transform="rotate(147, 77, 125)" />
+            <Ellipse cx="87" cy="129" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(147, 87, 129)" />
           </G>
         )}
 
@@ -393,11 +393,11 @@ function OfficialUnoCardSvg({
             <Ellipse
               cx="50"
               cy="74"
-              rx="35"
-              ry="52"
+              rx="27"
+              ry="42"
               fill="none"
               stroke="#FFFFFF"
-              strokeWidth="4"
+              strokeWidth="3.6"
               transform="rotate(-33, 50, 74)"
             />
 
