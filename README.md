@@ -12,9 +12,9 @@ A real-time multiplayer UNO card game built with **React Native (Expo)** and **N
 - **Modern 112-card deck** — Wild Swap Hands + Wild Shuffle Hands (40 pts) alongside the classic 108
 - **House Rules** — Draw Two stacking, 7-0 (7=swap, 0=rotate), Jump-In, Force Play, alternate scoring
 - **2–10 Players** — Create or join rooms with shareable 6-character codes
-- **AI Bots** — Fill empty seats with stall-proof AI opponents
-- **Elemental Visuals** — Lightweight animated ember/cosmic background, glossy gradient cards, neon glow effects, dark arcade theme
-- **Smooth Animations** — Reanimated 4 UI-thread animations tuned to stay light (reduced-motion aware)
+- **AI Bots** — Fill empty seats with stall-proof, configurable AI opponents
+- **Stunning Visuals** — Clean vector-rendered Mattel deck, responsive casino stadium layout, dark arcade theme
+- **Smooth Animations** — Reanimated UI-thread animations tuned for high performance (reduced-motion aware)
 - **Haptic Feedback** — Tactile responses for card interactions
 - **Cross-Platform** — iOS, Android, and Web from a single codebase
 

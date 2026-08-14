@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "./dev.sh",
     "install:all": "cd packages/shared && npm install && npm run build && cd ../server && npm install && cd ../mobile && npm install",
     "server:dev": "cd apps/server && npm run dev",
     "server:build": "cd apps/server && npm run build",

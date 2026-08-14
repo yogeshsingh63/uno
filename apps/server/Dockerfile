@@ -17,5 +17,6 @@ COPY --from=builder /app/apps/server/node_modules ./node_modules
 COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/apps/server/package.json ./
 EXPOSE 3001
+ENV PORT=3001
 ENV NODE_ENV=production
 CMD ["node", "dist/index.js"]
