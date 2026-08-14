@@ -119,10 +119,10 @@ function OfficialUnoCardSvg({
             <Ellipse
               cx="50"
               cy="74"
-              rx="36"
-              ry="58"
+              rx="40"
+              ry="55"
               fill="#FFFFFF"
-              transform="rotate(-38, 50, 74)"
+              transform="rotate(-31, 50, 74)"
             />
           )}
         </G>
