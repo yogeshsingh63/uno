@@ -1,16 +1,9 @@
 // ============================================================
-// CardFace — Dispatcher: renders the correct card face
+// CardFace — Dispatcher: renders the pixel-perfect vector UNO card
 // ============================================================
 import React, { memo } from 'react';
-import { CardType as CType, CardColor } from '@uno/shared';
-import NumberCard from './NumberCard';
-import SkipCard from './SkipCard';
-import ReverseCard from './ReverseCard';
-import DrawTwoCard from './DrawTwoCard';
-import WildCard from './WildCard';
-import WildDrawFourCard from './WildDrawFourCard';
-import SwapHandsCard from './SwapHandsCard';
-import ShuffleHandsCard from './ShuffleHandsCard';
+import { CardType as CType } from '@uno/shared';
+import OfficialUnoCardSvg, { UnoCardType } from './OfficialUnoCardSvg';
 
 interface CardFaceProps {
   type: string;        // CardType enum value
@@ -23,104 +16,30 @@ interface CardFaceProps {
   challengePending?: boolean;
 }
 
+function getUnoType(type: string, value?: number): UnoCardType {
+  if (type === CType.NUMBER) {
+    return String(value ?? 0) as UnoCardType;
+  }
+  return type as UnoCardType;
+}
+
 function CardFace({
   type, color, value, width, height, borderRadius = 10,
   declaredColor, challengePending,
 }: CardFaceProps) {
-  switch (type) {
-    case CType.NUMBER:
-      return (
-        <NumberCard
-          color={color}
-          value={value ?? 0}
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-        />
-      );
+  const unoType = getUnoType(type, value);
 
-    case CType.SKIP:
-      return (
-        <SkipCard
-          color={color}
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-        />
-      );
-
-    case CType.REVERSE:
-      return (
-        <ReverseCard
-          color={color}
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-        />
-      );
-
-    case CType.DRAW_TWO:
-      return (
-        <DrawTwoCard
-          color={color}
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-        />
-      );
-
-    case CType.WILD:
-      return (
-        <WildCard
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-          declaredColor={declaredColor}
-        />
-      );
-
-    case CType.WILD_DRAW_FOUR:
-      return (
-        <WildDrawFourCard
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-          declaredColor={declaredColor}
-          challengePending={challengePending}
-        />
-      );
-
-    case CType.SWAP_HANDS:
-      return (
-        <SwapHandsCard
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-          declaredColor={declaredColor}
-        />
-      );
-
-    case CType.SHUFFLE_HANDS:
-      return (
-        <ShuffleHandsCard
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-          declaredColor={declaredColor}
-        />
-      );
-
-    default:
-      return (
-        <NumberCard
-          color={color}
-          value={0}
-          width={width}
-          height={height}
-          borderRadius={borderRadius}
-        />
-      );
-  }
+  return (
+    <OfficialUnoCardSvg
+      type={unoType}
+      color={color}
+      width={width}
+      height={height}
+      borderRadius={borderRadius}
+      declaredColor={declaredColor}
+      challengePending={challengePending}
+    />
+  );
 }
 
 export default memo(CardFace);
