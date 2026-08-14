@@ -1,21 +1,18 @@
 // ============================================================
 // OfficialUnoCardSvg — Pixel-Perfect Vector UNO Card
-// Renders exact 1:1 official Mattel UNO cards:
-// - White outer frame with smooth card radius
-// - Diagonal white oval ellipse ring precisely proportioned
-// - Solid black 3D drop shadows on all symbols & digits
-// - Exact 4-color oval for Wilds with white outline border
-// - Exact 4-card cascade for +4 on solid white oval fill
-// - Exact 2-card overlap for +2 with black drop shadows
-// - Exact skip circle & 45° bar for Skip
-// - Exact interlocking reverse arrows for Reverse
+// Precise 1:1 Creazilla vector specification:
+// - Exact 100 x 148 viewBox with 3.5px white outer border
+// - Diagonal white oval ellipse (rx 36.5, ry 56, -33°) touching side borders
+// - Crisp, upright bold geometric typography
+// - Exact mini cards for +2 and +4
+// - Exact geometric Skip and Reverse glyphs
+// - Exact 4-color oval for Wilds
 // ============================================================
 import React, { memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, {
   Rect, Ellipse, Path, G, Text as SvgText, Defs, ClipPath,
 } from 'react-native-svg';
-import { CARD_COLORS } from '../../constants/cardColors';
 
 export type UnoCardType =
   | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -34,10 +31,10 @@ interface OfficialUnoCardProps {
 
 function getSuitColor(colorKey: string): string {
   switch (colorKey?.toUpperCase()) {
-    case 'RED': return '#D71921';
-    case 'YELLOW': return '#F9B200';
-    case 'GREEN': return '#279B37';
-    case 'BLUE': return '#0066D6';
+    case 'RED': return '#EB212E';
+    case 'YELLOW': return '#FFBA00';
+    case 'GREEN': return '#00B32C';
+    case 'BLUE': return '#3E4EF7';
     default: return '#111116';
   }
 }
@@ -55,7 +52,6 @@ function OfficialUnoCardSvg({
   const baseColor = isWild ? '#111116' : getSuitColor(color);
   const declaredGlow = declaredColor ? getSuitColor(declaredColor) : null;
 
-  // ViewBox: 100 x 148 (standard official 1:1.48 UNO card proportion)
   return (
     <View style={[styles.wrapper, { width, height, borderRadius }]}>
       {/* Declared Color Halo (when played on table) */}
@@ -96,12 +92,12 @@ function OfficialUnoCardSvg({
 
           {/* Corner Top-Left Mini 4-color oval clip */}
           <ClipPath id="cornerTLOval">
-            <Ellipse cx="13.5" cy="24" rx="6.8" ry="10.8" transform="rotate(-33, 13.5, 24)" />
+            <Ellipse cx="17" cy="25" rx="6.8" ry="10.8" transform="rotate(-33, 17, 25)" />
           </ClipPath>
 
           {/* Corner Bottom-Right Mini 4-color oval clip */}
           <ClipPath id="cornerBROval">
-            <Ellipse cx="86.5" cy="124" rx="6.8" ry="10.8" transform="rotate(147, 86.5, 124)" />
+            <Ellipse cx="83" cy="123" rx="6.8" ry="10.8" transform="rotate(147, 83, 123)" />
           </ClipPath>
         </Defs>
 
@@ -137,44 +133,44 @@ function OfficialUnoCardSvg({
             {/* Center Digit in Card's Solid Suit Color */}
             <SvgText
               x="50"
-              y="98"
-              fontSize="76"
+              y="99"
+              fontSize="78"
               fontWeight="900"
               textAnchor="middle"
               fill={baseColor}
-              fontFamily="Arial Black, Impact, sans-serif"
+              fontFamily="Arial Black, Impact, 'Arial-BoldMT', sans-serif"
             >
               {type}
             </SvgText>
 
             {/* 6 and 9 Disambiguation Underline in Suit Color */}
             {(type === '6' || type === '9') && (
-              <Rect x="36" y="104" width="28" height="5" rx="2.5" fill={baseColor} />
+              <Rect x="36" y="105" width="28" height="5" rx="2.5" fill={baseColor} />
             )}
 
             {/* Top-Left Corner Index in Solid White */}
             <SvgText
-              x="16.5"
+              x="17"
               y="36"
-              fontSize="32"
+              fontSize="33"
               fontWeight="900"
               textAnchor="middle"
               fill="#FFFFFF"
-              fontFamily="Arial Black, Impact, sans-serif"
+              fontFamily="Arial Black, Impact, 'Arial-BoldMT', sans-serif"
             >
               {type}
             </SvgText>
 
             {/* Bottom-Right Corner Index in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 83.5, 112)">
+            <G transform="rotate(180, 83, 112)">
               <SvgText
-                x="83.5"
+                x="83"
                 y="112"
-                fontSize="32"
+                fontSize="33"
                 fontWeight="900"
                 textAnchor="middle"
                 fill="#FFFFFF"
-                fontFamily="Arial Black, Impact, sans-serif"
+                fontFamily="Arial Black, Impact, 'Arial-BoldMT', sans-serif"
               >
                 {type}
               </SvgText>
@@ -200,29 +196,27 @@ function OfficialUnoCardSvg({
 
             {/* Top-Left Corner "+2" in Solid White */}
             <SvgText
-              x="14"
-              y="24"
-              fontSize="23"
+              x="17"
+              y="32"
+              fontSize="25"
               fontWeight="900"
-              fontStyle="italic"
               textAnchor="middle"
               fill="#FFFFFF"
-              fontFamily="Arial, sans-serif"
+              fontFamily="Arial Black, Impact, sans-serif"
             >
               +2
             </SvgText>
 
             {/* Bottom-Right Corner "+2" in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86, 124)">
+            <G transform="rotate(180, 83, 116)">
               <SvgText
-                x="86"
-                y="124"
-                fontSize="23"
+                x="83"
+                y="116"
+                fontSize="25"
                 fontWeight="900"
-                fontStyle="italic"
                 textAnchor="middle"
                 fill="#FFFFFF"
-                fontFamily="Arial, sans-serif"
+                fontFamily="Arial Black, Impact, sans-serif"
               >
                 +2
               </SvgText>
@@ -234,17 +228,17 @@ function OfficialUnoCardSvg({
         {type === 'SKIP' && (
           <G>
             {/* Center Skip Circle with Diagonal Bar in Suit Color */}
-            <Ellipse cx="50" cy="74" rx="22" ry="22" fill="none" stroke={baseColor} strokeWidth="7.5" />
-            <Path d="M 34.5 58.5 L 65.5 89.5" stroke={baseColor} strokeWidth="7.5" strokeLinecap="square" />
+            <Ellipse cx="50" cy="74" rx="23" ry="23" fill="none" stroke={baseColor} strokeWidth="8" />
+            <Path d="M 34 58 L 66 90" stroke={baseColor} strokeWidth="8" strokeLinecap="square" />
 
             {/* Top-Left Corner Skip in Solid White */}
-            <Ellipse cx="13.5" cy="24" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
-            <Path d="M 7.5 18 L 19.5 30" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
+            <Ellipse cx="17" cy="26" rx="9" ry="9" fill="none" stroke="#FFFFFF" strokeWidth="3.4" />
+            <Path d="M 11 20 L 23 32" stroke="#FFFFFF" strokeWidth="3.4" strokeLinecap="square" />
 
             {/* Bottom-Right Corner Skip in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 124)">
-              <Ellipse cx="86.5" cy="124" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
-              <Path d="M 80.5 118 L 92.5 130" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
+            <G transform="rotate(180, 83, 122)">
+              <Ellipse cx="83" cy="122" rx="9" ry="9" fill="none" stroke="#FFFFFF" strokeWidth="3.4" />
+              <Path d="M 77 116 L 89 128" stroke="#FFFFFF" strokeWidth="3.4" strokeLinecap="square" />
             </G>
           </G>
         )}
@@ -267,7 +261,7 @@ function OfficialUnoCardSvg({
             </G>
 
             {/* Corner Top-Left in Solid White */}
-            <G transform="translate(13.5, 23) scale(0.44) translate(-50, -74)">
+            <G transform="translate(17, 26) scale(0.46) translate(-50, -74)">
               <Path
                 d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
                 fill="#FFFFFF"
@@ -281,7 +275,7 @@ function OfficialUnoCardSvg({
             </G>
 
             {/* Corner Bottom-Right in Solid White (Rotated 180°) */}
-            <G transform="translate(86.5, 125) rotate(180) scale(0.44) translate(-50, -74)">
+            <G transform="translate(83, 122) rotate(180) scale(0.46) translate(-50, -74)">
               <Path
                 d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
                 fill="#FFFFFF"
@@ -302,13 +296,13 @@ function OfficialUnoCardSvg({
             {/* Center 4-Color Oval */}
             <G clipPath="url(#wildCenterOval)">
               {/* Top-Left Sector: RED */}
-              <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#ED3838" />
+              <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#EB212E" />
               {/* Top-Right Sector: BLUE */}
-              <Path d="M 50 74 L 50 0 L 100 0 L 100 74 Z" fill="#3B4BF5" />
+              <Path d="M 50 74 L 50 0 L 100 0 L 100 74 Z" fill="#3E4EF7" />
               {/* Middle-Left Sector: YELLOW */}
-              <Path d="M 50 74 L 0 74 L 0 148 L 26 148 Z" fill="#FFA000" />
+              <Path d="M 50 74 L 0 74 L 0 148 L 26 148 Z" fill="#FFBA00" />
               {/* Bottom & Bottom-Right Sector: GREEN */}
-              <Path d="M 50 74 L 100 74 L 100 148 L 26 148 Z" fill="#00A825" />
+              <Path d="M 50 74 L 100 74 L 100 148 L 26 148 Z" fill="#00B32C" />
             </G>
             {/* White Outline Border around 4-Color Oval */}
             <Ellipse
@@ -324,21 +318,21 @@ function OfficialUnoCardSvg({
 
             {/* Corner Top-Left Mini 4-Color Oval */}
             <G clipPath="url(#cornerTLOval)">
-              <Path d="M 13.5 24 L 13.5 0 L 0 0 L 0 24 Z" fill="#ED3838" />
-              <Path d="M 13.5 24 L 13.5 0 L 30 0 L 30 24 Z" fill="#3B4BF5" />
-              <Path d="M 13.5 24 L 0 24 L 0 48 L 7.5 48 Z" fill="#FFA000" />
-              <Path d="M 13.5 24 L 30 24 L 30 48 L 7.5 48 Z" fill="#00A825" />
+              <Path d="M 17 25 L 17 0 L 0 0 L 0 25 Z" fill="#EB212E" />
+              <Path d="M 17 25 L 17 0 L 34 0 L 34 25 Z" fill="#3E4EF7" />
+              <Path d="M 17 25 L 0 25 L 0 50 L 9 50 Z" fill="#FFBA00" />
+              <Path d="M 17 25 L 34 25 L 34 50 L 9 50 Z" fill="#00B32C" />
             </G>
-            <Ellipse cx="13.5" cy="24" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(-33, 13.5, 24)" />
+            <Ellipse cx="17" cy="25" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(-33, 17, 25)" />
 
             {/* Corner Bottom-Right Mini 4-Color Oval (Rotated 180°) */}
             <G clipPath="url(#cornerBROval)">
-              <Path d="M 86.5 124 L 86.5 148 L 100 148 L 100 124 Z" fill="#ED3838" />
-              <Path d="M 86.5 124 L 86.5 148 L 70 148 L 70 124 Z" fill="#3B4BF5" />
-              <Path d="M 86.5 124 L 100 124 L 100 100 L 92.5 100 Z" fill="#FFA000" />
-              <Path d="M 86.5 124 L 70 124 L 70 100 L 92.5 100 Z" fill="#00A825" />
+              <Path d="M 83 123 L 83 148 L 100 148 L 100 123 Z" fill="#EB212E" />
+              <Path d="M 83 123 L 83 148 L 66 148 L 66 123 Z" fill="#3E4EF7" />
+              <Path d="M 83 123 L 100 123 L 100 98 L 91 98 Z" fill="#FFBA00" />
+              <Path d="M 83 123 L 66 123 L 66 98 L 91 98 Z" fill="#00B32C" />
             </G>
-            <Ellipse cx="86.5" cy="124" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(147, 86.5, 124)" />
+            <Ellipse cx="83" cy="123" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(147, 83, 123)" />
           </G>
         )}
 
@@ -348,50 +342,50 @@ function OfficialUnoCardSvg({
             {/* 1. Red Mini Card (Left, rotated -14°) */}
             <G transform="rotate(-14, 31, 70)">
               <Rect x="21" y="53" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-              <Rect x="23.5" y="55.5" width="15" height="29" rx="2.5" fill="#ED3838" />
+              <Rect x="23.5" y="55.5" width="15" height="29" rx="2.5" fill="#EB212E" />
             </G>
 
             {/* 2. Blue Mini Card (Top-Center, rotated 12°) */}
             <G transform="rotate(12, 48, 53)">
               <Rect x="38" y="36" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-              <Rect x="40.5" y="38.5" width="15" height="29" rx="2.5" fill="#4252F5" />
+              <Rect x="40.5" y="38.5" width="15" height="29" rx="2.5" fill="#3E4EF7" />
             </G>
 
             {/* 3. Yellow Mini Card (Bottom-Center, rotated 10°) */}
             <G transform="rotate(10, 44, 77)">
               <Rect x="34" y="60" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-              <Rect x="36.5" y="62.5" width="15" height="29" rx="2.5" fill="#FFA000" />
+              <Rect x="36.5" y="62.5" width="15" height="29" rx="2.5" fill="#FFBA00" />
             </G>
 
             {/* 4. Green Mini Card (Right, rotated 18°) */}
             <G transform="rotate(18, 60, 64)">
               <Rect x="50" y="47" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-              <Rect x="52.5" y="49.5" width="15" height="29" rx="2.5" fill="#00A825" />
+              <Rect x="52.5" y="49.5" width="15" height="29" rx="2.5" fill="#00B32C" />
             </G>
 
             {/* Top-Left Corner "+4" */}
             <SvgText
-              x="13.5"
-              y="25"
-              fontSize="23"
+              x="17"
+              y="32"
+              fontSize="25"
               fontWeight="900"
               textAnchor="middle"
               fill="#FFFFFF"
-              fontFamily="Arial, sans-serif"
+              fontFamily="Arial Black, Impact, sans-serif"
             >
               +4
             </SvgText>
 
             {/* Bottom-Right Corner "+4" (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 123)">
+            <G transform="rotate(180, 83, 116)">
               <SvgText
-                x="86.5"
-                y="123"
-                fontSize="23"
+                x="83"
+                y="116"
+                fontSize="25"
                 fontWeight="900"
                 textAnchor="middle"
                 fill="#FFFFFF"
-                fontFamily="Arial, sans-serif"
+                fontFamily="Arial Black, Impact, sans-serif"
               >
                 +4
               </SvgText>
@@ -404,10 +398,10 @@ function OfficialUnoCardSvg({
           <G>
             {/* Center 4-Color Oval */}
             <G clipPath="url(#wildCenterOval)">
-              <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#ED3838" />
-              <Path d="M 50 74 L 50 0 L 100 0 L 100 74 Z" fill="#3B4BF5" />
-              <Path d="M 50 74 L 0 74 L 0 148 L 26 148 Z" fill="#FFA000" />
-              <Path d="M 50 74 L 100 74 L 100 148 L 26 148 Z" fill="#00A825" />
+              <Path d="M 50 74 L 50 0 L 0 0 L 0 74 Z" fill="#EB212E" />
+              <Path d="M 50 74 L 50 0 L 100 0 L 100 74 Z" fill="#3E4EF7" />
+              <Path d="M 50 74 L 0 74 L 0 148 L 26 148 Z" fill="#FFBA00" />
+              <Path d="M 50 74 L 100 74 L 100 148 L 26 148 Z" fill="#00B32C" />
             </G>
             <Ellipse
               cx="50"
@@ -429,13 +423,13 @@ function OfficialUnoCardSvg({
             </SvgText>
 
             {/* Top-Left Corner */}
-            <SvgText x="13.5" y="24" fontSize="18" fontWeight="900" textAnchor="middle" fill="#FFFFFF" stroke="#000000" strokeWidth="1" fontFamily="Arial, sans-serif">
+            <SvgText x="17" y="30" fontSize="20" fontWeight="900" textAnchor="middle" fill="#FFFFFF" stroke="#000000" strokeWidth="1" fontFamily="Arial, sans-serif">
               {type === 'SWAP_HANDS' ? '⇄' : '⟳'}
             </SvgText>
 
             {/* Bottom-Right Corner */}
-            <G transform="rotate(180, 86.5, 126)">
-              <SvgText x="86.5" y="126" fontSize="18" fontWeight="900" textAnchor="middle" fill="#FFFFFF" stroke="#000000" strokeWidth="1" fontFamily="Arial, sans-serif">
+            <G transform="rotate(180, 83, 118)">
+              <SvgText x="83" y="118" fontSize="20" fontWeight="900" textAnchor="middle" fill="#FFFFFF" stroke="#000000" strokeWidth="1" fontFamily="Arial, sans-serif">
                 {type === 'SWAP_HANDS' ? '⇄' : '⟳'}
               </SvgText>
             </G>
