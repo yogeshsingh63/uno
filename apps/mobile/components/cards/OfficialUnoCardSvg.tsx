@@ -191,14 +191,14 @@ function OfficialUnoCardSvg({
             {/* Center Two Overlapping Tilted Mini Cards in Suit Color */}
             {/* 1. Back Mini Card (Lower-Left, rotated 18°) */}
             <G transform="rotate(18, 38, 73)">
-              <Rect x="27" y="55" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="0.8" />
-              <Rect x="29.5" y="57.5" width="17" height="31" rx="2.5" fill={baseColor} />
+              <Rect x="25" y="52" width="24" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.2" />
+              <Rect x="28" y="55" width="18" height="32" rx="3" fill={baseColor} />
             </G>
 
             {/* 2. Front Mini Card (Upper-Right, rotated 18°) */}
             <G transform="rotate(18, 54, 53)">
-              <Rect x="43" y="35" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="0.8" />
-              <Rect x="45.5" y="37.5" width="17" height="31" rx="2.5" fill={baseColor} />
+              <Rect x="43" y="34" width="24" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.2" />
+              <Rect x="46" y="37" width="18" height="32" rx="3" fill={baseColor} />
             </G>
 
             {/* Top-Left Corner "+2" in Solid White */}
