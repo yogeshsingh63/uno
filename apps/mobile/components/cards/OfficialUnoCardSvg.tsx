@@ -112,17 +112,17 @@ function OfficialUnoCardSvg({
         <Rect x="4.5" y="4.5" width="91" height="139" rx="6" fill={baseColor} />
 
         {/* ============================================================ */}
-        {/* THE ICONIC DIAGONAL WHITE OVAL FILL                          */}
+        {/* THE ICONIC DIAGONAL WHITE OVAL FILL (CREAZILLA SPEC)          */}
         {/* ============================================================ */}
         <G clipPath="url(#cardBodyClip)">
           {type !== 'WILD' && (
             <Ellipse
               cx="50"
               cy="74"
-              rx="40"
-              ry="55"
+              rx="36.5"
+              ry="56"
               fill="#FFFFFF"
-              transform="rotate(-31, 50, 74)"
+              transform="rotate(-33, 50, 74)"
             />
           )}
         </G>
@@ -137,13 +137,12 @@ function OfficialUnoCardSvg({
             {/* Center Digit in Card's Solid Suit Color */}
             <SvgText
               x="50"
-              y="97"
-              fontSize="74"
+              y="98"
+              fontSize="76"
               fontWeight="900"
-              fontStyle="italic"
               textAnchor="middle"
               fill={baseColor}
-              fontFamily="Arial, sans-serif"
+              fontFamily="Arial Black, Impact, sans-serif"
             >
               {type}
             </SvgText>
@@ -155,29 +154,27 @@ function OfficialUnoCardSvg({
 
             {/* Top-Left Corner Index in Solid White */}
             <SvgText
-              x="13.5"
-              y="25"
-              fontSize="23"
+              x="16.5"
+              y="36"
+              fontSize="32"
               fontWeight="900"
-              fontStyle="italic"
               textAnchor="middle"
               fill="#FFFFFF"
-              fontFamily="Arial, sans-serif"
+              fontFamily="Arial Black, Impact, sans-serif"
             >
               {type}
             </SvgText>
 
             {/* Bottom-Right Corner Index in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 123)">
+            <G transform="rotate(180, 83.5, 112)">
               <SvgText
-                x="86.5"
-                y="123"
-                fontSize="23"
+                x="83.5"
+                y="112"
+                fontSize="32"
                 fontWeight="900"
-                fontStyle="italic"
                 textAnchor="middle"
                 fill="#FFFFFF"
-                fontFamily="Arial, sans-serif"
+                fontFamily="Arial Black, Impact, sans-serif"
               >
                 {type}
               </SvgText>

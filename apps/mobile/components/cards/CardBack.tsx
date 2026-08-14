@@ -44,10 +44,10 @@ function CardBack({ width, height, borderRadius = 10 }: CardBackProps) {
           <Ellipse
             cx="50"
             cy="74"
-            rx="40"
-            ry="55"
+            rx="36.5"
+            ry="56"
             fill="#ED1C24"
-            transform="rotate(-31, 50, 74)"
+            transform="rotate(-33, 50, 74)"
           />
         </G>
 
