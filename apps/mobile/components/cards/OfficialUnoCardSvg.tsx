@@ -119,8 +119,8 @@ function OfficialUnoCardSvg({
             <Ellipse
               cx="50"
               cy="74"
-              rx="38"
-              ry="56"
+              rx="32"
+              ry="46"
               fill="#FFFFFF"
               transform="rotate(-33, 50, 74)"
             />
@@ -189,22 +189,22 @@ function OfficialUnoCardSvg({
         {type === 'DRAW_TWO' && (
           <G>
             {/* Center Two Overlapping Tilted Mini Cards in Suit Color - Centered at (50, 74) */}
-            {/* 1. Back Mini Card (Lower-Left, centered at 42, 84, rotated 18°) */}
-            <G transform="rotate(18, 42, 84)">
-              <Rect x="30.5" y="65" width="23" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-              <Rect x="33" y="67.5" width="18" height="33" rx="2.8" fill={baseColor} />
+            {/* 1. Back Mini Card (Lower-Left, centered at 43, 81, rotated 18°) */}
+            <G transform="rotate(18, 43, 81)">
+              <Rect x="32" y="63" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="0.9" />
+              <Rect x="34.5" y="65.5" width="17" height="31" rx="2.5" fill={baseColor} />
             </G>
 
-            {/* 2. Front Mini Card (Upper-Right, centered at 58, 64, rotated 18°) */}
-            <G transform="rotate(18, 58, 64)">
-              <Rect x="46.5" y="45" width="23" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-              <Rect x="49" y="47.5" width="18" height="33" rx="2.8" fill={baseColor} />
+            {/* 2. Front Mini Card (Upper-Right, centered at 57, 67, rotated 18°) */}
+            <G transform="rotate(18, 57, 67)">
+              <Rect x="46" y="49" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="0.9" />
+              <Rect x="48.5" y="51.5" width="17" height="31" rx="2.5" fill={baseColor} />
             </G>
 
             {/* Top-Left Corner "+2" in Solid White */}
             <SvgText
-              x="13.5"
-              y="25"
+              x="14"
+              y="24"
               fontSize="23"
               fontWeight="900"
               fontStyle="italic"
@@ -216,10 +216,10 @@ function OfficialUnoCardSvg({
             </SvgText>
 
             {/* Bottom-Right Corner "+2" in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 123)">
+            <G transform="rotate(180, 86, 124)">
               <SvgText
-                x="86.5"
-                y="123"
+                x="86"
+                y="124"
                 fontSize="23"
                 fontWeight="900"
                 fontStyle="italic"
