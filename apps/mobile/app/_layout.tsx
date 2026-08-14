@@ -6,15 +6,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, LuckiestGuy_400Regular } from '@expo-google-fonts/luckiest-guy';
 import { Colors } from '../constants/colors';
-import { useGameSocket } from '../hooks/useGameSocket';
 import { soundService } from '../services/soundService';
 
 SplashScreen.preventAutoHideAsync();
-
-function SocketProvider({ children }: { children: React.ReactNode }) {
-  useGameSocket();
-  return <>{children}</>;
-}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({ LuckiestGuy_400Regular });
@@ -33,17 +27,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
       <StatusBar style="light" />
-      <SocketProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: Colors.background },
-            // Web prefers a quick cross-fade; native gets the classic slide
-            animation: Platform.OS === 'web' ? 'fade' : 'slide_from_right',
-            animationDuration: 220,
-          }}
-        />
-      </SocketProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.background },
+          // Web prefers a quick cross-fade; native gets the classic slide
+          animation: Platform.OS === 'web' ? 'fade' : 'slide_from_right',
+          animationDuration: 220,
+        }}
+      />
     </GestureHandlerRootView>
   );
 }

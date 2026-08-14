@@ -341,6 +341,15 @@ export function registerSocketHandlers(io: Server) {
         return;
       }
 
+      // Revoke the player's previous socket so a stale connection (e.g. an old
+      // tab that kept its socket.io session alive) can no longer act as them.
+      const prevSocketId = playerSocketMap.get(data.playerId);
+      if (prevSocketId && prevSocketId !== socket.id) {
+        socketPlayerMap.delete(prevSocketId);
+        const prev = io.sockets.sockets.get(prevSocketId);
+        prev?.leave(room.code);
+      }
+
       socketPlayerMap.set(socket.id, data.playerId);
       playerSocketMap.set(data.playerId, socket.id);
       socket.join(room.code);

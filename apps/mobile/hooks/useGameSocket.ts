@@ -14,6 +14,19 @@ import {
   RoomState, TurnState, CardColor, PublicGameState, RoomSettings,
 } from '@uno/shared';
 
+// The socket listeners are shared across every screen that mounts this hook
+// (expo-router keeps the lobby mounted underneath the game screen, so both
+// would otherwise attach a second set of listeners — double toasts, double
+// sounds and duplicate auto-draws). Registration is reference-counted so
+// listeners attach once and detach only when the last screen unmounts.
+let listenerCount = 0;
+
+function unregisterSocketListeners(socket: ReturnType<typeof socketService.connect>) {
+  socket.off('connect');
+  socket.off('disconnect');
+  Object.values(SERVER_EVENTS).forEach(event => socket.off(event));
+}
+
 export function useGameSocket() {
   const router = useRouter();
   const store = useGameStore;
@@ -31,6 +44,15 @@ export function useGameSocket() {
 
   useEffect(() => {
     const socket = socketService.connect();
+
+    // If another screen already owns the listeners, don't attach a second set.
+    if (listenerCount > 0) {
+      listenerCount++;
+      return () => {
+        listenerCount--;
+      };
+    }
+    listenerCount = 1;
 
     socket.on('connect', () => store.getState().setConnected(true));
     socket.on('disconnect', () => store.getState().setConnected(false));
@@ -268,9 +290,10 @@ export function useGameSocket() {
     });
 
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      Object.values(SERVER_EVENTS).forEach(event => socket.off(event));
+      listenerCount--;
+      if (listenerCount === 0) {
+        unregisterSocketListeners(socket);
+      }
     };
   }, []);
 
@@ -358,7 +381,7 @@ export function useGameSocket() {
     const rc = store.getState().roomCode;
     if (rc) socketService.emit(CLIENT_EVENTS.LEAVE_ROOM, { roomCode: rc });
     store.getState().resetAll();
-    router.replace('/home');
+    router.replace('/');
   }, []);
 
   const nextRound = useCallback(() => {

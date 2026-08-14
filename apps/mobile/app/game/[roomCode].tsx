@@ -6,6 +6,7 @@ import Animated, {
   withSequence, withTiming, withSpring, withDelay,
 } from 'react-native-reanimated';
 import { useLocalSearchParams } from 'expo-router';
+import Head from 'expo-router/head';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -13,13 +14,11 @@ import { soundService } from '../../services/soundService';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import { useHaptics } from '../../hooks/useHaptics';
 import { useResponsive } from '../../hooks/useResponsive';
-import { Card as CardType, CardColor, GamePhase, TurnState } from '@uno/shared';
+import { Card as CardType, CardColor, CardType as CardTypeEnum, GamePhase, TurnState, isCardPlayable } from '@uno/shared';
 import { Colors } from '../../constants/colors';
 import PressableScale from '../../components/ui/PressableScale';
-import AdBannerSlot from '../../components/ads/AdBannerSlot';
 import { maybeShowInterstitial } from '../../components/ads/adHooks';
 
-import ElementalBackground from '../../components/ui/ElementalBackground';
 import CardHand from '../../components/cards/CardHand';
 import DiscardPile from '../../components/cards/DiscardPile';
 import DrawPile from '../../components/cards/DrawPile';
@@ -70,7 +69,7 @@ export default function GameScreen() {
     showColorPicker, showChallengeModal, showSwapModal, showEndRoundModal, showFinalWinnerModal,
     drawnCard, canPlayDrawnCard, toasts, emojiReactions, lastDrawSeq, lastDrawCard,
     roundWinnerName, cumulativeScores,
-    gameWinnerName, finalScores, effects,
+    gameWinnerName, finalScores, effects, addToast,
   } = useGameStore();
   const { playerId } = usePlayerStore();
   const { hapticsEnabled, soundEnabled, toggleHaptics, toggleSound } = useSettingsStore();
@@ -212,6 +211,43 @@ export default function GameScreen() {
     drawCard();
   }, [drawCard, haptics]);
 
+  // ---- Auto-draw: when it's your turn and you have no valid move (or owe a
+  // +2 penalty), draw automatically instead of requiring a click. ----
+  const autoDrawKeyRef = useRef<string | null>(null);
+  React.useEffect(() => {
+    if (!gameState) return;
+    const active = gameState.phase === GamePhase.PLAYING && isMyTurn &&
+      gameState.turnState === TurnState.AWAITING_PLAY;
+    if (!active) {
+      autoDrawKeyRef.current = null;
+      return;
+    }
+    // Never auto-draw while a decision modal is up
+    if (showColorPicker || showChallengeModal || showSwapModal) return;
+
+    const owesPenalty = gameState.pendingDrawCount > 0;
+    const noValidMove = !myHand.some(c =>
+      isCardPlayable(c, gameState.topCard, gameState.activeColor)
+    );
+    if (!owesPenalty && !noValidMove) return;
+
+    // Draw once per turn. The key guards against re-firing during the beat
+    // where CARD_DRAWN has arrived but the turn-advance update hasn't yet.
+    const key = `${gameState.roundNumber}:${gameState.currentPlayerIndex}`;
+    if (autoDrawKeyRef.current === key) return;
+    autoDrawKeyRef.current = key;
+
+    if (noValidMove) {
+      addToast({ message: 'No valid moves — drew a card', type: 'info' });
+    }
+    const timer = setTimeout(() => drawCard(), 700);
+    return () => clearTimeout(timer);
+  }, [
+    gameState, isMyTurn, myHand,
+    showColorPicker, showChallengeModal, showSwapModal,
+    drawCard, addToast,
+  ]);
+
   const handleCallUno = useCallback(() => {
     haptics.heavyImpact();
     declareUno();
@@ -272,7 +308,6 @@ export default function GameScreen() {
   if (!gameState) {
     return (
       <View style={styles.container}>
-        <ElementalBackground variant="cosmic" lite />
         <Text style={styles.loadingText}>Loading game...</Text>
       </View>
     );
@@ -296,7 +331,10 @@ export default function GameScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ElementalBackground variant="cosmic" lite />
+      <Head>
+        <title>UNO Online — Live Game</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
 
       <Animated.View style={[styles.gameContent, shakeStyle]}>
 
@@ -747,6 +785,9 @@ const styles = StyleSheet.create({
   seatsContainer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 25,
+  },
+  seat: {
+    position: 'absolute',
   },
   opponentsWrap: {
     position: 'absolute', top: -10, left: 0, right: 0, zIndex: 25,

@@ -2,15 +2,16 @@ import React, { useRef } from 'react';
 import { StyleSheet, View, Text, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import Head from 'expo-router/head';
 import { Colors } from '../constants/colors';
 import { CardColor } from '@uno/shared';
-import ElementalBackground from '../components/ui/ElementalBackground';
-import NumberCard from '../components/cards/NumberCard';
-import WildCard from '../components/cards/WildCard';
-import DrawTwoCard from '../components/cards/DrawTwoCard';
+import OfficialUnoCardSvg, { UnoCardType } from '../components/cards/OfficialUnoCardSvg';
 import CardBack from '../components/cards/CardBack';
 
 const FONT = 'LuckiestGuy_400Regular';
+
+const SITE_DESCRIPTION =
+  'Play UNO online for free! Real-time multiplayer rooms for up to 10 players, official 112-card deck, Wild Draw 4 challenges, 7-0 swaps, and custom house rules.';
 
 const FEATURES = [
   { icon: '⚡', title: 'Real-Time Multiplayer', desc: 'Play live with friends or spar against bots — rooms for up to 10 players.', accent: Colors.red },
@@ -27,29 +28,27 @@ const STEPS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Static Clean Hero Card (Zero CPU/Animation Overhead)
+// Hero card fan (static — no animation, no lag)
 // ---------------------------------------------------------------------------
 function HeroCard({ index, color, value, type, w, h }: {
   index: number; color: string; value?: number; type: 'number' | 'wild' | 'draw2'; w: number; h: number;
 }) {
   const card = type === 'wild' ? (
-    <WildCard width={w} height={h} borderRadius={Math.round(w * 0.14)} />
+    <OfficialUnoCardSvg type="WILD" color="WILD" width={w} height={h} borderRadius={Math.round(w * 0.14)} />
   ) : type === 'draw2' ? (
-    <DrawTwoCard color={color} width={w} height={h} borderRadius={Math.round(w * 0.14)} />
+    <OfficialUnoCardSvg type="DRAW_TWO" color={color} width={w} height={h} borderRadius={Math.round(w * 0.14)} />
   ) : (
-    <NumberCard color={color} value={value ?? 0} width={w} height={h} borderRadius={Math.round(w * 0.14)} />
+    <OfficialUnoCardSvg type={String(value ?? 0) as UnoCardType} color={color} width={w} height={h} borderRadius={Math.round(w * 0.14)} />
   );
-
-  const rotate = `${(index - 2) * 12}deg`;
   return (
-    <View style={[styles.floatWrap, { width: w, height: h, transform: [{ rotate }] }]}>
+    <View style={[styles.floatWrap, { width: w, height: h, transform: [{ rotate: `${(index - 2) * 12}deg` }] }]}>
       {card}
     </View>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Luxury Stadium Poker Table Showcase
+// Interactive table preview
 // ---------------------------------------------------------------------------
 function TableMockup() {
   const cw = 60;
@@ -98,7 +97,7 @@ function TableMockup() {
             ))}
           </View>
 
-          {/* Table Centerfelt: Draw Pile | Direction | Discard Pile */}
+          {/* Table Center: Draw Pile | Direction | Discard Pile */}
           <View style={styles.mockCenter}>
             {/* Draw Pile */}
             <View style={styles.mockDrawWrap}>
@@ -122,7 +121,7 @@ function TableMockup() {
             <View style={styles.mockDiscardWrap}>
               <View style={styles.discardGlowHalo} />
               <View style={{ transform: [{ rotate: '-4deg' }] }}>
-                <NumberCard color={CardColor.RED} value={7} width={cw} height={ch} borderRadius={9} />
+                <OfficialUnoCardSvg type="7" color={CardColor.RED} width={cw} height={ch} borderRadius={9} />
               </View>
             </View>
           </View>
@@ -136,17 +135,17 @@ function TableMockup() {
 
             <View style={styles.mockHand}>
               <View style={styles.mockCardSlot}>
-                <NumberCard color={CardColor.GREEN} value={3} width={cw} height={ch} borderRadius={9} />
+                <OfficialUnoCardSvg type="3" color={CardColor.GREEN} width={cw} height={ch} borderRadius={9} />
               </View>
               <View style={[styles.mockCardSlot, { marginLeft: -cw * 0.32 }]}>
-                <NumberCard color={CardColor.YELLOW} value={9} width={cw} height={ch} borderRadius={9} />
+                <OfficialUnoCardSvg type="9" color={CardColor.YELLOW} width={cw} height={ch} borderRadius={9} />
               </View>
               <View style={[styles.mockCardSlot, { marginLeft: -cw * 0.32 }]}>
-                <WildCard width={cw} height={ch} borderRadius={9} />
+                <OfficialUnoCardSvg type="WILD" color="WILD" width={cw} height={ch} borderRadius={9} />
               </View>
               {/* Playable +2 card with highlight lift */}
               <View style={[styles.mockCardSlot, styles.playableCardSlot, { marginLeft: -cw * 0.32 }]}>
-                <DrawTwoCard color={CardColor.BLUE} width={cw} height={ch} borderRadius={9} />
+                <OfficialUnoCardSvg type="DRAW_TWO" color={CardColor.BLUE} width={cw} height={ch} borderRadius={9} />
               </View>
             </View>
           </View>
@@ -157,7 +156,7 @@ function TableMockup() {
 }
 
 // ---------------------------------------------------------------------------
-// Landing Screen (Lightweight, SEO-Optimized, High Performance)
+// Landing Screen
 // ---------------------------------------------------------------------------
 export default function LandingScreen() {
   const router = useRouter();
@@ -176,7 +175,18 @@ export default function LandingScreen() {
 
   return (
     <View style={styles.container}>
-      <ElementalBackground variant="embers" />
+      <Head>
+        <title>UNO Online — Free Multiplayer Card Game</title>
+        <meta name="description" content={SITE_DESCRIPTION} />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="UNO Online — Free Multiplayer Card Game" />
+        <meta property="og:description" content={SITE_DESCRIPTION} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="UNO Online — Free Multiplayer Card Game" />
+        <meta name="twitter:description" content={SITE_DESCRIPTION} />
+      </Head>
 
       <ScrollView
         ref={scrollRef}
@@ -200,7 +210,7 @@ export default function LandingScreen() {
             <Text style={styles.tagline}>THE CLASSIC CARD GAME — REIMAGINED</Text>
 
             <View style={styles.ctaRow}>
-              <Pressable onPress={goPlay} style={[styles.ctaWrap, { flex: isWide ? 0 : 1 }]}>
+              <Pressable onPress={goPlay} style={styles.ctaWrap}>
                 <LinearGradient
                   colors={['#E8364B', '#A0182A']}
                   style={styles.primaryCta}
@@ -210,7 +220,7 @@ export default function LandingScreen() {
                   <Text style={styles.primaryCtaText}>▶  PLAY NOW</Text>
                 </LinearGradient>
               </Pressable>
-              <Pressable onPress={scrollToHowTo} style={[styles.secondaryCta, { flex: isWide ? 0 : 1 }]}>
+              <Pressable onPress={scrollToHowTo} style={styles.secondaryCta}>
                 <Text style={styles.secondaryCtaText}>How to Play</Text>
               </Pressable>
             </View>
@@ -222,7 +232,7 @@ export default function LandingScreen() {
             </View>
           </View>
 
-          {/* Hero card fan */}
+          {/* Hero card fan (static) */}
           <View style={styles.fanRow}>
             <HeroCard index={0} color={CardColor.YELLOW} value={5} type="number" w={fanW} h={fanH} />
             <HeroCard index={1} color={CardColor.GREEN} value={2} type="number" w={fanW} h={fanH} />
@@ -238,9 +248,7 @@ export default function LandingScreen() {
             <Text style={styles.sectionLabel}>LIVE PREVIEW</Text>
             <Text style={styles.sectionTitle}>It plays like the real deck.</Text>
           </View>
-          <View>
-            <TableMockup />
-          </View>
+          <TableMockup />
         </View>
 
         {/* ================= FEATURES ================= */}
@@ -283,20 +291,18 @@ export default function LandingScreen() {
 
         {/* ================= CTA BAND ================= */}
         <View style={[styles.section, { maxWidth: 860 }]}>
-          <View>
-            <LinearGradient
-              colors={['#E8364B', '#A0182A']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.ctaBand}
-            >
-              <Text style={styles.ctaBandTitle}>Ready to play?</Text>
-              <Text style={styles.ctaBandSub}>Create a room, invite your friends, and let the chaos begin.</Text>
-              <Pressable onPress={goPlay} style={styles.ctaBandBtn}>
-                <Text style={styles.ctaBandBtnText}>START PLAYING →</Text>
-              </Pressable>
-            </LinearGradient>
-          </View>
+          <LinearGradient
+            colors={['#E8364B', '#A0182A']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.ctaBand}
+          >
+            <Text style={styles.ctaBandTitle}>Ready to play?</Text>
+            <Text style={styles.ctaBandSub}>Create a room, invite your friends, and let the chaos begin.</Text>
+            <Pressable onPress={goPlay} style={styles.ctaBandBtn}>
+              <Text style={styles.ctaBandBtnText}>START PLAYING →</Text>
+            </Pressable>
+          </LinearGradient>
         </View>
 
         {/* ================= FOOTER ================= */}
@@ -324,49 +330,53 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,54,75,0.10)', borderWidth: 1, borderColor: 'rgba(232,54,75,0.30)',
     borderRadius: 999, paddingHorizontal: 18, paddingVertical: 7,
   },
-  badgeText: { color: Colors.red, fontSize: 11, fontWeight: '800', letterSpacing: 2 },
-  logoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  badgeText: { color: Colors.red, fontSize: 11, fontWeight: '700', letterSpacing: 3 },
+
+  logoRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },
   logoLetter: {
-    fontFamily: FONT, fontSize: 72, letterSpacing: -2,
-    textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 10,
+    fontFamily: FONT, fontSize: 100, lineHeight: 104,
+    textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 20,
   },
-  logoRed: { color: Colors.red },
-  logoYellow: { color: Colors.yellow, transform: [{ rotate: '-6deg' }] },
-  logoBlue: { color: Colors.blue, transform: [{ rotate: '4deg' }] },
+  logoRed: { color: Colors.red, textShadowColor: 'rgba(232,54,75,0.4)' },
+  logoYellow: { color: Colors.yellow, textShadowColor: 'rgba(245,184,0,0.4)', marginHorizontal: -6 },
+  logoBlue: { color: Colors.blue, textShadowColor: 'rgba(43,139,245,0.4)' },
+
   tagline: {
-    color: Colors.textSecondary, fontSize: 13, fontWeight: '700',
-    letterSpacing: 3, marginTop: 10, textAlign: 'center',
+    color: Colors.textSecondary, fontSize: 11, fontWeight: '700',
+    letterSpacing: 5, marginTop: 10,
   },
 
-  ctaRow: { flexDirection: 'row', gap: 12, marginTop: 28, width: '100%', maxWidth: 380 },
-  ctaWrap: {},
+  ctaRow: { flexDirection: 'row', gap: 12, marginTop: 28, justifyContent: 'center', flexWrap: 'wrap' },
+  ctaWrap: { minWidth: 190, flexShrink: 0 },
   primaryCta: {
-    paddingVertical: 14, paddingHorizontal: 28, borderRadius: 14, alignItems: 'center',
-    shadowColor: Colors.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8,
+    borderRadius: 16, paddingVertical: 16, paddingHorizontal: 28, alignItems: 'center',
+    shadowColor: Colors.red, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10,
   },
-  primaryCtaText: { color: Colors.white, fontFamily: FONT, fontSize: 17, letterSpacing: 1 },
+  primaryCtaText: { color: Colors.white, fontFamily: FONT, fontSize: 20, letterSpacing: 1.5, textAlign: 'center' },
   secondaryCta: {
-    paddingVertical: 14, paddingHorizontal: 24, borderRadius: 14, alignItems: 'center',
-    backgroundColor: 'rgba(255,220,180,0.06)', borderWidth: 1, borderColor: 'rgba(255,220,180,0.15)',
+    borderRadius: 16, paddingVertical: 14, paddingHorizontal: 28, alignItems: 'center',
+    borderWidth: 1.5, borderColor: 'rgba(255,220,180,0.15)', backgroundColor: 'rgba(28,22,30,0.7)',
+    justifyContent: 'center', minWidth: 190, flexShrink: 0,
   },
-  secondaryCtaText: { color: Colors.textPrimary, fontSize: 14, fontWeight: '700' },
+  secondaryCtaText: { color: Colors.textPrimary, fontSize: 15, fontWeight: '700' },
 
-  statsRow: { flexDirection: 'row', gap: 8, marginTop: 24 },
+  statsRow: { flexDirection: 'row', gap: 8, marginTop: 22, flexWrap: 'wrap', justifyContent: 'center' },
   statChip: {
-    backgroundColor: 'rgba(255,220,180,0.05)', borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(255,220,180,0.08)',
+    backgroundColor: 'rgba(255,220,180,0.06)', borderWidth: 1, borderColor: 'rgba(255,220,180,0.10)',
+    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 5,
   },
-  statText: { color: Colors.textMuted, fontSize: 10, fontWeight: '700', letterSpacing: 1 },
+  statText: { color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
 
-  fanRow: {
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
-    marginTop: 36, height: 120,
+  floatWrap: {
+    shadowColor: '#000', shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
   },
-  floatWrap: { marginHorizontal: -12 },
+
+  fanRow: { flexDirection: 'row', marginTop: 46, justifyContent: 'center', paddingHorizontal: 28 },
 
   // ---- Sections ----
-  section: { width: '100%', paddingHorizontal: 24, marginTop: 72 },
-  sectionHead: { marginBottom: 28, alignItems: 'flex-start' },
+  section: { width: '100%', paddingHorizontal: 24, paddingTop: 72, alignSelf: 'center' },
+  sectionHead: { marginBottom: 24 },
   sectionLabel: { color: Colors.metallicGold, fontSize: 11, fontWeight: '700', letterSpacing: 3, marginBottom: 6 },
   sectionTitle: { color: Colors.textPrimary, fontSize: 28, fontWeight: '800' },
 

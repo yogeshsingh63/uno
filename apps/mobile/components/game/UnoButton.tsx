@@ -4,7 +4,7 @@
 import React, { memo, useEffect } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withRepeat, withSequence,
+  useSharedValue, useAnimatedStyle, withSequence,
   withSpring, withTiming,
 } from 'react-native-reanimated';
 import { soundService } from '../../services/soundService';
@@ -26,27 +26,14 @@ function UnoButton({ visible, shouldPulse, onPress, bottomOffset = 145 }: UnoBut
   const labelOpacity = useSharedValue(0);
 
   useEffect(() => {
-    if (shouldPulse && visible) {
-      scale.value = withRepeat(
-        withSequence(
-          withTiming(1.1, { duration: 450 }),
-          withTiming(1.0, { duration: 450 }),
-        ), -1, true
-      );
-      glowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(1.0, { duration: 450 }),
-          withTiming(0.4, { duration: 450 }),
-        ), -1, true
-      );
-    } else if (visible) {
+    if (visible) {
       scale.value = withSpring(1.0);
       glowOpacity.value = withTiming(0.7, { duration: 300 });
     } else {
       scale.value = withTiming(0.82, { duration: 200 });
       glowOpacity.value = withTiming(0, { duration: 200 });
     }
-  }, [visible, shouldPulse]);
+  }, [visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

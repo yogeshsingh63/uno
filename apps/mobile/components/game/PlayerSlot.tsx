@@ -6,7 +6,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, {
-  useAnimatedStyle, withRepeat, withSequence, withTiming,
+  useAnimatedStyle, withSequence, withTiming,
   useSharedValue, withDelay,
 } from 'react-native-reanimated';
 import { PlayerGameState } from '@uno/shared';
@@ -23,26 +23,11 @@ interface PlayerSlotProps {
 }
 
 function PlayerSlot({ player, isActive, position = 'top', effect }: PlayerSlotProps) {
-  const ringOpacity = useSharedValue(0);
   const xMarkScale = useSharedValue(0);
   const xMarkOpacity = useSharedValue(0);
   const shakeX = useSharedValue(0);
   const hitRingOpacity = useSharedValue(0);
   const dimOpacity = useSharedValue(1);
-
-  // Turn ring pulse
-  React.useEffect(() => {
-    if (isActive) {
-      ringOpacity.value = withRepeat(
-        withSequence(
-          withTiming(1, { duration: 600 }),
-          withTiming(0.35, { duration: 600 }),
-        ), -1, true
-      );
-    } else {
-      ringOpacity.value = withTiming(0, { duration: 200 });
-    }
-  }, [isActive]);
 
   // Special-card moments
   React.useEffect(() => {
@@ -100,11 +85,6 @@ function PlayerSlot({ player, isActive, position = 'top', effect }: PlayerSlotPr
     }
   }, [effect?.kind]);
 
-  const ringStyle = useAnimatedStyle(() => ({
-    borderColor: isActive ? Colors.yellow : 'transparent',
-    opacity: ringOpacity.value,
-  }));
-
   const hitRingStyle = useAnimatedStyle(() => ({
     opacity: hitRingOpacity.value,
   }));
@@ -131,7 +111,7 @@ function PlayerSlot({ player, isActive, position = 'top', effect }: PlayerSlotPr
       <View style={[styles.pod, isActive && styles.podActive]}>
         {/* Avatar with turn ring */}
         <View style={styles.avatarContainer}>
-          <Animated.View style={[styles.turnRing, ringStyle]} />
+          {isActive && <View style={[styles.turnRing, styles.turnRingActive]} />}
           <Animated.View style={[styles.hitRing, hitRingStyle]} />
           <AvatarBadge emoji={player.avatar} size={36} />
 
@@ -201,6 +181,9 @@ const styles = StyleSheet.create({
     borderWidth: 2.5,
     top: -4,
     left: -4,
+  },
+  turnRingActive: {
+    borderColor: Colors.yellow,
     shadowColor: Colors.yellow,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,

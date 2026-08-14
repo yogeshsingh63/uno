@@ -1,44 +1,17 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, Pressable, ScrollView, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  FadeInDown, FadeInUp, FadeIn, useSharedValue, useAnimatedStyle,
-  withRepeat, withSequence, withTiming, withDelay, Easing,
-} from 'react-native-reanimated';
+import Head from 'expo-router/head';
 import { Colors } from '../constants/colors';
 import { AVATARS } from '../constants/avatars';
 import { usePlayerStore } from '../stores/playerStore';
 import { useGameSocket } from '../hooks/useGameSocket';
-import ElementalBackground from '../components/ui/ElementalBackground';
 import AvatarBadge from '../components/ui/AvatarBadge';
-import CardBack from '../components/cards/CardBack';
 
 const FONT = 'LuckiestGuy_400Regular';
 
-function FloatingCard({ index, size, left, top, rotate }: { index: number; size: number; left?: number; top: number; rotate: string }) {
-  const bob = useSharedValue(0);
-
-  React.useEffect(() => {
-    bob.value = withDelay(index * 500, withRepeat(
-      withSequence(
-        withTiming(-6, { duration: 2400, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 2400, easing: Easing.inOut(Easing.sin) }),
-      ), -1, true
-    ));
-  }, []);
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateY: bob.value }, { rotate }],
-  }));
-
-  return (
-    <Animated.View style={[styles.floatCard, left != null ? { left, top } : { right: 0, top }]}>
-      <Animated.View style={style}>
-        <CardBack width={size} height={Math.round(size * (10 / 7))} borderRadius={Math.round(size * 0.14)} />
-      </Animated.View>
-    </Animated.View>
-  );
-}
+const SITE_DESCRIPTION =
+  'Play UNO online for free! Real-time multiplayer rooms for up to 10 players, official 112-card deck, Wild Draw 4 challenges, 7-0 swaps, and custom house rules.';
 
 export default function HomeScreen() {
   const { playerName, avatar, setPlayerName, setAvatar } = usePlayerStore();
@@ -68,21 +41,26 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <ElementalBackground variant="embers" />
+      <Head>
+        <title>Join a Room — UNO Online</title>
+        <meta name="description" content={SITE_DESCRIPTION} />
+        <meta name="robots" content="index, follow" />
+      </Head>
 
-      {/* Floating cards behind the header */}
-      <FloatingCard index={0} size={50} left={22} top={68} rotate="-11deg" />
-      <FloatingCard index={1} size={42} top={90} rotate="9deg" />
-
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Header */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.header}>
+        <View style={styles.header}>
           <Text style={styles.logo}>UNO</Text>
           <Text style={styles.tagline}>REAL-TIME MULTIPLAYER</Text>
-        </Animated.View>
+        </View>
 
         {/* Name Input */}
-        <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.card}>
+        <View style={styles.card}>
           <Text style={styles.label}>YOUR NAME</Text>
           <View style={styles.inputWrap}>
             <Text style={styles.inputIcon}>👤</Text>
@@ -95,22 +73,19 @@ export default function HomeScreen() {
               maxLength={15}
             />
           </View>
-        </Animated.View>
+        </View>
 
         {/* Avatar Selection */}
-        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.card}>
+        <View style={styles.card}>
           <Text style={styles.label}>CHOOSE AVATAR</Text>
           <View style={styles.avatarGrid}>
-            {AVATARS.map((a, i) => {
+            {AVATARS.map((a) => {
               const selected = avatar === a.emoji;
               return (
                 <Pressable key={a.emoji} onPress={() => setAvatar(a.emoji)} style={styles.avatarOption}>
-                  <Animated.View
-                    entering={FadeInUp.delay(340 + i * 35).duration(280)}
-                    style={[styles.avatarBadgeWrap, selected && styles.avatarSelected]}
-                  >
+                  <View style={[styles.avatarBadgeWrap, selected && styles.avatarSelected]}>
                     <AvatarBadge emoji={a.emoji} size={42} />
-                  </Animated.View>
+                  </View>
                   <Text style={[styles.avatarName, selected && styles.avatarNameActive]} numberOfLines={1}>
                     {a.name}
                   </Text>
@@ -118,10 +93,10 @@ export default function HomeScreen() {
               );
             })}
           </View>
-        </Animated.View>
+        </View>
 
         {/* Action Buttons */}
-        <Animated.View entering={FadeInUp.delay(440).duration(400)} style={styles.actions}>
+        <View style={styles.actions}>
           <Pressable onPress={handleCreateRoom} style={({ pressed }) => pressed && styles.pressed}>
             <LinearGradient
               colors={['#E8364B', '#A0182A']}
@@ -138,7 +113,7 @@ export default function HomeScreen() {
               <Text style={styles.secondaryButtonText}>Join Room</Text>
             </Pressable>
           ) : (
-            <Animated.View entering={FadeIn.duration(220)} style={styles.joinSection}>
+            <View style={styles.joinSection}>
               <TextInput
                 style={[styles.input, styles.codeInput]}
                 placeholder="ROOM CODE"
@@ -151,10 +126,9 @@ export default function HomeScreen() {
               <Pressable onPress={handleJoinRoom} style={styles.joinButton}>
                 <Text style={styles.joinButtonText}>Join</Text>
               </Pressable>
-            </Animated.View>
+            </View>
           )}
-        </Animated.View>
-
+        </View>
       </ScrollView>
     </View>
   );
@@ -232,6 +206,4 @@ const styles = StyleSheet.create({
     shadowColor: Colors.blue, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 6,
   },
   joinButtonText: { color: Colors.white, fontSize: 16, fontWeight: '800' },
-
-  floatCard: { position: 'absolute', opacity: 0.8 },
 });

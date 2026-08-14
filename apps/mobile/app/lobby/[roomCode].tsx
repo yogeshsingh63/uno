@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, Pressable, FlatList, Share, Switch, ScrollView, Platform } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import Animated, { FadeInDown, FadeIn, FadeInUp, ZoomIn } from 'react-native-reanimated';
+import Head from 'expo-router/head';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../constants/colors';
 import { useGameStore } from '../../stores/gameStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import { PlayerInfo, RoomSettings } from '@uno/shared';
-import ElementalBackground from '../../components/ui/ElementalBackground';
 import AvatarBadge from '../../components/ui/AvatarBadge';
 
 export default function LobbyScreen() {
@@ -50,8 +49,8 @@ export default function LobbyScreen() {
     }
   };
 
-  const renderPlayer = ({ item, index }: { item: PlayerInfo; index: number }) => (
-    <Animated.View entering={FadeInDown.delay(index * 80).duration(350)} style={styles.playerRow}>
+  const renderPlayer = ({ item }: { item: PlayerInfo }) => (
+    <View style={styles.playerRow}>
       <AvatarBadge emoji={item.avatar} size={38} />
       <View style={{ flex: 1 }}>
         <Text style={styles.playerName}>
@@ -61,12 +60,15 @@ export default function LobbyScreen() {
       <View style={[styles.statusBadge, item.isReady || item.isHost ? styles.readyBadge : styles.notReadyBadge]}>
         <Text style={styles.statusText}>{item.isHost ? 'Host' : item.isReady ? 'Ready' : 'Waiting'}</Text>
       </View>
-    </Animated.View>
+    </View>
   );
 
   return (
     <View style={styles.container}>
-      <ElementalBackground variant="cosmic" />
+      <Head>
+        <title>Room {String(roomCode ?? '')} · UNO Online</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
 
       {/* Toasts (e.g. code copied) */}
       <View style={styles.toastArea} pointerEvents="none">
@@ -78,22 +80,20 @@ export default function LobbyScreen() {
       </View>
 
       {/* Room Code */}
-      <Animated.View entering={FadeIn.delay(150).duration(400)} style={styles.codeCard}>
+      <View style={styles.codeCard}>
         <Text style={styles.codeLabel}>ROOM CODE</Text>
         <Pressable onPress={handleCopyCode}>
           <Text style={styles.codeValue}>{roomCode}</Text>
           {copied ? (
-            <Animated.Text entering={ZoomIn.duration(180)} style={[styles.shareTip, styles.copiedTip]}>
-              ✓ Copied!
-            </Animated.Text>
+            <Text style={[styles.shareTip, styles.copiedTip]}>✓ Copied!</Text>
           ) : (
             <Text style={styles.shareTip}>Tap to copy</Text>
           )}
         </Pressable>
-      </Animated.View>
+      </View>
 
       {/* Player List */}
-      <Animated.View entering={FadeIn.delay(250).duration(400)} style={styles.playersSection}>
+      <View style={styles.playersSection}>
         <Text style={styles.playersLabel}>
           Players ({roomState?.players?.length || 0}/{roomState?.maxPlayers || 10})
         </Text>
@@ -103,11 +103,11 @@ export default function LobbyScreen() {
           keyExtractor={(item) => item.id}
           style={styles.playerList}
         />
-      </Animated.View>
+      </View>
 
       {/* Settings Panel (host only) */}
       {isHost && (
-        <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.settingsSection}>
+        <View style={styles.settingsSection}>
           <Pressable onPress={() => setShowSettings(!showSettings)} style={styles.settingsToggle}>
             <Text style={styles.settingsToggleText}>⚙️ House Rules {showSettings ? '▲' : '▼'}</Text>
           </Pressable>
@@ -157,11 +157,11 @@ export default function LobbyScreen() {
               </View>
             </ScrollView>
           )}
-        </Animated.View>
+        </View>
       )}
 
       {/* Actions */}
-      <Animated.View entering={FadeInUp.delay(350).duration(400)} style={styles.actions}>
+      <View style={styles.actions}>
         {!isHost && (
           <Pressable onPress={toggleReady} style={styles.readyButton}>
             <Text style={styles.readyButtonText}>
@@ -191,7 +191,7 @@ export default function LobbyScreen() {
         <Pressable onPress={leaveRoom} style={styles.leaveButton}>
           <Text style={styles.leaveButtonText}>Leave</Text>
         </Pressable>
-      </Animated.View>
+      </View>
     </View>
   );
 }

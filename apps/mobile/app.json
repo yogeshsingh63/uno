@@ -1,14 +1,15 @@
 {
   "expo": {
-    "name": "UNO Multiplayer",
+    "name": "UNO Online Multiplayer",
     "slug": "uno-multiplayer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "scheme": "uno",
+    "description": "Play UNO online for free! Real-time multiplayer rooms for up to 10 players, official 112-card deck, Wild Draw 4 challenges, 7-0 swaps, and custom house rules.",
     "splash": {
-      "backgroundColor": "#0d0d1a"
+      "backgroundColor": "#0c0a0f"
     },
     "ios": {
       "supportsTablet": true,
@@ -16,13 +17,18 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0d0d1a"
+        "backgroundColor": "#0c0a0f"
       },
       "package": "com.uno.multiplayer"
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/icon.png",
+      "name": "UNO Online",
+      "shortName": "UNO Online",
+      "description": "Play UNO online for free! Real-time multiplayer rooms for up to 10 players, official 112-card deck, Wild Draw 4 challenges, and custom house rules.",
+      "themeColor": "#0c0a0f",
+      "backgroundColor": "#0c0a0f"
     },
     "plugins": [
       "expo-router",

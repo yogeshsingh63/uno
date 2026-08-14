@@ -5,9 +5,8 @@
 // AdSense / Meta Audience Network). Nothing here loads a real ad
 // or makes a network request. When wiring a real SDK:
 //   1. call maybeShowInterstitial() at the round-end break,
-//   2. call claimRewardedPerk() from the perk button,
-//   3. render <AdBannerSlot /> in the reserved spot.
-// All three are intentionally trivial right now so the game is
+//   2. call claimRewardedPerk() from the perk button.
+// Both are intentionally trivial right now so the game is
 // never blocked or slowed by ad code.
 // ============================================================
 

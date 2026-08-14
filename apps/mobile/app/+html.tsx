@@ -58,11 +58,15 @@ export default function Root({ children }: PropsWithChildren) {
         <meta property="og:description" content="Play the iconic card game in your browser. Real-time multiplayer rooms, bots, official 112-card deck, Wild challenges, and custom house rules." />
         <meta property="og:site_name" content="UNO Online" />
         <meta property="og:locale" content="en_US" />
+        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="UNO Online — Free Multiplayer Card Game" />
         <meta name="twitter:description" content="Play official UNO online in your browser with friends or bots. Instant room codes, 10-player support, and official rules." />
+        <meta name="twitter:image" content="/og-image.png" />
 
         {/* Schema.org Structured Data */}
         <script
