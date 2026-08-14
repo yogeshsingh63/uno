@@ -211,21 +211,21 @@ function OfficialUnoCardSvg({
           </G>
         )}
 
-        {/* --- SKIP (⊘) --- */}
+        {/* --- SKIP / BLOCK (⊘) --- */}
         {type === 'SKIP' && (
           <G>
-            {/* Center Skip Circle with 45° Diagonal Bar in Suit Color */}
-            <Ellipse cx="50" cy="74" rx="21" ry="21" fill="none" stroke={baseColor} strokeWidth="7" />
-            <Path d="M 35 59 L 65 89" stroke={baseColor} strokeWidth="7" strokeLinecap="square" />
+            {/* Center Skip Circle with Diagonal Bar in Suit Color */}
+            <Ellipse cx="50" cy="74" rx="22" ry="22" fill="none" stroke={baseColor} strokeWidth="7.5" />
+            <Path d="M 34.5 58.5 L 65.5 89.5" stroke={baseColor} strokeWidth="7.5" strokeLinecap="square" />
 
             {/* Top-Left Corner Skip in Solid White */}
-            <Ellipse cx="12.5" cy="18" rx="7.5" ry="7.5" fill="none" stroke="#FFFFFF" strokeWidth="3" />
-            <Path d="M 7.5 13 L 17.5 23" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="square" />
+            <Ellipse cx="13.5" cy="23" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
+            <Path d="M 7.5 17 L 19.5 29" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
 
             {/* Bottom-Right Corner Skip in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 130)">
-              <Ellipse cx="86.5" cy="130" rx="7.5" ry="7.5" fill="none" stroke="#FFFFFF" strokeWidth="3" />
-              <Path d="M 81.5 125 L 91.5 135" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="square" />
+            <G transform="rotate(180, 86.5, 125)">
+              <Ellipse cx="86.5" cy="125" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
+              <Path d="M 80.5 119 L 92.5 131" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
             </G>
           </G>
         )}
