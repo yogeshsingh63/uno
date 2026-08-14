@@ -387,37 +387,54 @@ function OfficialUnoCardSvg({
         {/* --- WILD DRAW FOUR (+4) --- */}
         {type === 'WILD_DRAW_FOUR' && (
           <G>
-            {/* Center 4 Overlapping Cards with Solid Black 3D Shadows */}
-            {/* 1. Green (Bottom-Left) */}
-            <Rect x="21" y="58" width="19" height="30" rx="3" fill="#000000" />
-            <Rect x="19" y="56" width="19" height="30" rx="3" fill={CARD_COLORS.GREEN} stroke="#000000" strokeWidth="1.8" />
+            {/* 1. Red Mini Card (Left, rotated -14°) */}
+            <G transform="rotate(-14, 31, 70)">
+              <Rect x="21" y="53" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
+              <Rect x="23.5" y="55.5" width="15" height="29" rx="2.5" fill="#ED3838" />
+            </G>
 
-            {/* 2. Blue (Mid-Left) */}
-            <Rect x="35" y="40" width="19" height="30" rx="3" fill="#000000" />
-            <Rect x="33" y="38" width="19" height="30" rx="3" fill={CARD_COLORS.BLUE} stroke="#000000" strokeWidth="1.8" />
+            {/* 2. Blue Mini Card (Top-Center, rotated 12°) */}
+            <G transform="rotate(12, 48, 53)">
+              <Rect x="38" y="36" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
+              <Rect x="40.5" y="38.5" width="15" height="29" rx="2.5" fill="#4252F5" />
+            </G>
 
-            {/* 3. Red (Center-Right, on top) */}
-            <Rect x="47" y="49" width="19" height="30" rx="3" fill="#000000" />
-            <Rect x="45" y="47" width="19" height="30" rx="3" fill={CARD_COLORS.RED} stroke="#000000" strokeWidth="1.8" />
+            {/* 3. Yellow Mini Card (Bottom-Center, rotated 10°) */}
+            <G transform="rotate(10, 44, 77)">
+              <Rect x="34" y="60" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
+              <Rect x="36.5" y="62.5" width="15" height="29" rx="2.5" fill="#FFA000" />
+            </G>
 
-            {/* 4. Yellow (Top-Right) */}
-            <Rect x="61" y="31" width="19" height="30" rx="3" fill="#000000" />
-            <Rect x="59" y="29" width="19" height="30" rx="3" fill={CARD_COLORS.YELLOW} stroke="#000000" strokeWidth="1.8" />
+            {/* 4. Green Mini Card (Right, rotated 18°) */}
+            <G transform="rotate(18, 60, 64)">
+              <Rect x="50" y="47" width="20" height="34" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
+              <Rect x="52.5" y="49.5" width="15" height="29" rx="2.5" fill="#00A825" />
+            </G>
 
             {/* Top-Left Corner "+4" */}
-            <SvgText x="15" y="22.5" fontSize="17" fontWeight="900" fontStyle="italic" textAnchor="middle" fill="#000000" fontFamily="Arial, sans-serif">
-              +4
-            </SvgText>
-            <SvgText x="13.5" y="21" fontSize="17" fontWeight="900" fontStyle="italic" textAnchor="middle" fill="#FFFFFF" fontFamily="Arial, sans-serif">
+            <SvgText
+              x="13.5"
+              y="25"
+              fontSize="23"
+              fontWeight="900"
+              textAnchor="middle"
+              fill="#FFFFFF"
+              fontFamily="Arial, sans-serif"
+            >
               +4
             </SvgText>
 
             {/* Bottom-Right Corner "+4" (Rotated 180°) */}
-            <G transform="rotate(180, 85.5, 127)">
-              <SvgText x="87" y="128.5" fontSize="17" fontWeight="900" fontStyle="italic" textAnchor="middle" fill="#000000" fontFamily="Arial, sans-serif">
-                +4
-              </SvgText>
-              <SvgText x="85.5" y="127" fontSize="17" fontWeight="900" fontStyle="italic" textAnchor="middle" fill="#FFFFFF" fontFamily="Arial, sans-serif">
+            <G transform="rotate(180, 86.5, 123)">
+              <SvgText
+                x="86.5"
+                y="123"
+                fontSize="23"
+                fontWeight="900"
+                textAnchor="middle"
+                fill="#FFFFFF"
+                fontFamily="Arial, sans-serif"
+              >
                 +4
               </SvgText>
             </G>
