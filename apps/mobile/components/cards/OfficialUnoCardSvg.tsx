@@ -188,17 +188,17 @@ function OfficialUnoCardSvg({
         {/* --- DRAW TWO (+2) --- */}
         {type === 'DRAW_TWO' && (
           <G>
-            {/* Center Two Overlapping Tilted Mini Cards in Suit Color */}
-            {/* 1. Back Mini Card (Lower-Left, rotated 18°) */}
-            <G transform="rotate(18, 38, 73)">
-              <Rect x="25" y="52" width="24" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.2" />
-              <Rect x="28" y="55" width="18" height="32" rx="3" fill={baseColor} />
+            {/* Center Two Overlapping Tilted Mini Cards in Suit Color - Centered at (50, 74) */}
+            {/* 1. Back Mini Card (Lower-Left, centered at 42, 84, rotated 18°) */}
+            <G transform="rotate(18, 42, 84)">
+              <Rect x="30.5" y="65" width="23" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
+              <Rect x="33" y="67.5" width="18" height="33" rx="2.8" fill={baseColor} />
             </G>
 
-            {/* 2. Front Mini Card (Upper-Right, rotated 18°) */}
-            <G transform="rotate(18, 54, 53)">
-              <Rect x="43" y="34" width="24" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1.2" />
-              <Rect x="46" y="37" width="18" height="32" rx="3" fill={baseColor} />
+            {/* 2. Front Mini Card (Upper-Right, centered at 58, 64, rotated 18°) */}
+            <G transform="rotate(18, 58, 64)">
+              <Rect x="46.5" y="45" width="23" height="38" rx="4.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
+              <Rect x="49" y="47.5" width="18" height="33" rx="2.8" fill={baseColor} />
             </G>
 
             {/* Top-Left Corner "+2" in Solid White */}
