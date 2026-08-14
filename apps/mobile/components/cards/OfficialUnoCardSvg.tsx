@@ -234,37 +234,45 @@ function OfficialUnoCardSvg({
         {type === 'REVERSE' && (
           <G>
             {/* Center Interlocking Curved Reverse Arrows in Suit Color */}
+            {/* Top-Right Arrow */}
             <Path
-              d="M 45 45 C 56 45 64 51 64 61 L 64 64 L 69 64 L 59 78 L 49 64 L 54 64 L 54 60 C 54 55 49 51 43 51 L 40 51 L 40 56 L 27 47 L 40 38 L 40 45 Z"
+              d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
               fill={baseColor}
             />
-            <Path
-              d="M 55 103 C 44 103 36 97 36 87 L 36 84 L 31 84 L 41 70 L 51 84 L 46 84 L 46 88 C 46 93 51 97 57 97 L 60 97 L 60 92 L 73 101 L 60 110 L 60 103 Z"
-              fill={baseColor}
-            />
-
-            {/* Corner Top-Left in Solid White */}
-            <G transform="scale(0.38) translate(3, 4)">
+            {/* Bottom-Left Arrow (Rotated 180° around center 50, 74) */}
+            <G transform="rotate(180, 50, 74)">
               <Path
-                d="M 45 45 C 56 45 64 51 64 61 L 64 64 L 69 64 L 59 78 L 49 64 L 54 64 L 54 60 C 54 55 49 51 43 51 L 40 51 L 40 56 L 27 47 L 40 38 L 40 45 Z"
-                fill="#FFFFFF"
-              />
-              <Path
-                d="M 55 103 C 44 103 36 97 36 87 L 36 84 L 31 84 L 41 70 L 51 84 L 46 84 L 46 88 C 46 93 51 97 57 97 L 60 97 L 60 92 L 73 101 L 60 110 L 60 103 Z"
-                fill="#FFFFFF"
+                d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
+                fill={baseColor}
               />
             </G>
 
+            {/* Corner Top-Left in Solid White */}
+            <G transform="translate(13.5, 23) scale(0.44) translate(-50, -74)">
+              <Path
+                d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
+                fill="#FFFFFF"
+              />
+              <G transform="rotate(180, 50, 74)">
+                <Path
+                  d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
+                  fill="#FFFFFF"
+                />
+              </G>
+            </G>
+
             {/* Corner Bottom-Right in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 128) scale(0.38) translate(198, 280)">
+            <G transform="translate(86.5, 125) rotate(180) scale(0.44) translate(-50, -74)">
               <Path
-                d="M 45 45 C 56 45 64 51 64 61 L 64 64 L 69 64 L 59 78 L 49 64 L 54 64 L 54 60 C 54 55 49 51 43 51 L 40 51 L 40 56 L 27 47 L 40 38 L 40 45 Z"
+                d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
                 fill="#FFFFFF"
               />
-              <Path
-                d="M 55 103 C 44 103 36 97 36 87 L 36 84 L 31 84 L 41 70 L 51 84 L 46 84 L 46 88 C 46 93 51 97 57 97 L 60 97 L 60 92 L 73 101 L 60 110 L 60 103 Z"
-                fill="#FFFFFF"
-              />
+              <G transform="rotate(180, 50, 74)">
+                <Path
+                  d="M 67 32 L 67 50 L 58 50 L 58 56 C 58 66 52 74 37 74 C 47 70 50 63 50 54 L 50 42 L 50 32 Z"
+                  fill="#FFFFFF"
+                />
+              </G>
             </G>
           </G>
         )}
