@@ -96,12 +96,12 @@ function OfficialUnoCardSvg({
 
           {/* Corner Top-Left Mini 4-color oval clip */}
           <ClipPath id="cornerTLOval">
-            <Ellipse cx="13" cy="19" rx="6.8" ry="10.8" transform="rotate(-33, 13, 19)" />
+            <Ellipse cx="13.5" cy="24" rx="6.8" ry="10.8" transform="rotate(-33, 13.5, 24)" />
           </ClipPath>
 
           {/* Corner Bottom-Right Mini 4-color oval clip */}
           <ClipPath id="cornerBROval">
-            <Ellipse cx="87" cy="129" rx="6.8" ry="10.8" transform="rotate(147, 87, 129)" />
+            <Ellipse cx="86.5" cy="124" rx="6.8" ry="10.8" transform="rotate(147, 86.5, 124)" />
           </ClipPath>
         </Defs>
 
@@ -204,9 +204,10 @@ function OfficialUnoCardSvg({
             {/* Top-Left Corner "+2" in Solid White */}
             <SvgText
               x="13.5"
-              y="26"
-              fontSize="24"
+              y="25"
+              fontSize="23"
               fontWeight="900"
+              fontStyle="italic"
               textAnchor="middle"
               fill="#FFFFFF"
               fontFamily="Arial, sans-serif"
@@ -215,12 +216,13 @@ function OfficialUnoCardSvg({
             </SvgText>
 
             {/* Bottom-Right Corner "+2" in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 122)">
+            <G transform="rotate(180, 86.5, 123)">
               <SvgText
                 x="86.5"
-                y="122"
-                fontSize="24"
+                y="123"
+                fontSize="23"
                 fontWeight="900"
+                fontStyle="italic"
                 textAnchor="middle"
                 fill="#FFFFFF"
                 fontFamily="Arial, sans-serif"
@@ -239,13 +241,13 @@ function OfficialUnoCardSvg({
             <Path d="M 34.5 58.5 L 65.5 89.5" stroke={baseColor} strokeWidth="7.5" strokeLinecap="square" />
 
             {/* Top-Left Corner Skip in Solid White */}
-            <Ellipse cx="13.5" cy="23" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
-            <Path d="M 7.5 17 L 19.5 29" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
+            <Ellipse cx="13.5" cy="24" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
+            <Path d="M 7.5 18 L 19.5 30" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
 
             {/* Bottom-Right Corner Skip in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 125)">
-              <Ellipse cx="86.5" cy="125" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
-              <Path d="M 80.5 119 L 92.5 131" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
+            <G transform="rotate(180, 86.5, 124)">
+              <Ellipse cx="86.5" cy="124" rx="8.5" ry="8.5" fill="none" stroke="#FFFFFF" strokeWidth="3.2" />
+              <Path d="M 80.5 118 L 92.5 130" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="square" />
             </G>
           </G>
         )}
@@ -325,21 +327,21 @@ function OfficialUnoCardSvg({
 
             {/* Corner Top-Left Mini 4-Color Oval */}
             <G clipPath="url(#cornerTLOval)">
-              <Path d="M 13 19 L 13 0 L 0 0 L 0 19 Z" fill="#ED3838" />
-              <Path d="M 13 19 L 13 0 L 30 0 L 30 19 Z" fill="#3B4BF5" />
-              <Path d="M 13 19 L 0 19 L 0 40 L 7 40 Z" fill="#FFA000" />
-              <Path d="M 13 19 L 30 19 L 30 40 L 7 40 Z" fill="#00A825" />
+              <Path d="M 13.5 24 L 13.5 0 L 0 0 L 0 24 Z" fill="#ED3838" />
+              <Path d="M 13.5 24 L 13.5 0 L 30 0 L 30 24 Z" fill="#3B4BF5" />
+              <Path d="M 13.5 24 L 0 24 L 0 48 L 7.5 48 Z" fill="#FFA000" />
+              <Path d="M 13.5 24 L 30 24 L 30 48 L 7.5 48 Z" fill="#00A825" />
             </G>
-            <Ellipse cx="13" cy="19" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(-33, 13, 19)" />
+            <Ellipse cx="13.5" cy="24" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(-33, 13.5, 24)" />
 
             {/* Corner Bottom-Right Mini 4-Color Oval (Rotated 180°) */}
             <G clipPath="url(#cornerBROval)">
-              <Path d="M 87 129 L 87 148 L 100 148 L 100 129 Z" fill="#ED3838" />
-              <Path d="M 87 129 L 87 148 L 70 148 L 70 129 Z" fill="#3B4BF5" />
-              <Path d="M 87 129 L 100 129 L 100 110 L 93 110 Z" fill="#FFA000" />
-              <Path d="M 87 129 L 70 129 L 70 110 L 93 110 Z" fill="#00A825" />
+              <Path d="M 86.5 124 L 86.5 148 L 100 148 L 100 124 Z" fill="#ED3838" />
+              <Path d="M 86.5 124 L 86.5 148 L 70 148 L 70 124 Z" fill="#3B4BF5" />
+              <Path d="M 86.5 124 L 100 124 L 100 100 L 92.5 100 Z" fill="#FFA000" />
+              <Path d="M 86.5 124 L 70 124 L 70 100 L 92.5 100 Z" fill="#00A825" />
             </G>
-            <Ellipse cx="87" cy="129" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(147, 87, 129)" />
+            <Ellipse cx="86.5" cy="124" rx="6.8" ry="10.8" fill="none" stroke="#FFFFFF" strokeWidth="1.8" transform="rotate(147, 86.5, 124)" />
           </G>
         )}
 
