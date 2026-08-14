@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, Text, Pressable, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, Pressable, ScrollView, SafeAreaView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   FadeIn, FadeInDown, FadeOut, ZoomIn, useAnimatedStyle, useSharedValue,
