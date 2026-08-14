@@ -188,23 +188,43 @@ function OfficialUnoCardSvg({
         {/* --- DRAW TWO (+2) --- */}
         {type === 'DRAW_TWO' && (
           <G>
-            {/* Center Two Overlapping Cards in Suit Color */}
-            {/* Back Mini Card (Top-Right) */}
-            <Rect x="44" y="38" width="21" height="34" rx="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-            <Rect x="46.5" y="40.5" width="16" height="29" rx="2.5" fill={baseColor} />
+            {/* Center Two Overlapping Tilted Mini Cards in Suit Color */}
+            {/* 1. Back Mini Card (Lower-Left, rotated 18°) */}
+            <G transform="rotate(18, 38, 73)">
+              <Rect x="27" y="55" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="0.8" />
+              <Rect x="29.5" y="57.5" width="17" height="31" rx="2.5" fill={baseColor} />
+            </G>
 
-            {/* Front Mini Card (Bottom-Left) */}
-            <Rect x="33" y="54" width="21" height="34" rx="3.5" fill="#FFFFFF" stroke="#000000" strokeWidth="1" />
-            <Rect x="35.5" y="56.5" width="16" height="29" rx="2.5" fill={baseColor} />
+            {/* 2. Front Mini Card (Upper-Right, rotated 18°) */}
+            <G transform="rotate(18, 54, 53)">
+              <Rect x="43" y="35" width="22" height="36" rx="4" fill="#FFFFFF" stroke="#000000" strokeWidth="0.8" />
+              <Rect x="45.5" y="37.5" width="17" height="31" rx="2.5" fill={baseColor} />
+            </G>
 
             {/* Top-Left Corner "+2" in Solid White */}
-            <SvgText x="13.5" y="25" fontSize="21" fontWeight="900" fontStyle="italic" textAnchor="middle" fill="#FFFFFF" fontFamily="Arial, sans-serif">
+            <SvgText
+              x="13.5"
+              y="26"
+              fontSize="24"
+              fontWeight="900"
+              textAnchor="middle"
+              fill="#FFFFFF"
+              fontFamily="Arial, sans-serif"
+            >
               +2
             </SvgText>
 
             {/* Bottom-Right Corner "+2" in Solid White (Rotated 180°) */}
-            <G transform="rotate(180, 86.5, 123)">
-              <SvgText x="86.5" y="123" fontSize="21" fontWeight="900" fontStyle="italic" textAnchor="middle" fill="#FFFFFF" fontFamily="Arial, sans-serif">
+            <G transform="rotate(180, 86.5, 122)">
+              <SvgText
+                x="86.5"
+                y="122"
+                fontSize="24"
+                fontWeight="900"
+                textAnchor="middle"
+                fill="#FFFFFF"
+                fontFamily="Arial, sans-serif"
+              >
                 +2
               </SvgText>
             </G>
