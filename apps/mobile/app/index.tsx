@@ -2,10 +2,6 @@ import React, { useRef } from 'react';
 import { StyleSheet, View, Text, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  FadeInDown, FadeInUp, useSharedValue, useAnimatedStyle,
-  withRepeat, withSequence, withTiming, withDelay, Easing,
-} from 'react-native-reanimated';
 import { Colors } from '../constants/colors';
 import { CardColor } from '@uno/shared';
 import ElementalBackground from '../components/ui/ElementalBackground';
@@ -31,33 +27,8 @@ const STEPS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Floating card with gentle drift
+// Static Clean Hero Card (Zero CPU/Animation Overhead)
 // ---------------------------------------------------------------------------
-function FloatingCard({ index, card, w, h, rotate }: {
-  index: number; card: React.ReactNode; w: number; h: number; rotate: string;
-}) {
-  const bob = useSharedValue(0);
-
-  React.useEffect(() => {
-    bob.value = withDelay(index * 400, withRepeat(
-      withSequence(
-        withTiming(-6, { duration: 2200 + index * 200, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 2200 + index * 200, easing: Easing.inOut(Easing.sin) }),
-      ), -1, true
-    ));
-  }, []);
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateY: bob.value }],
-  }));
-
-  return (
-    <Animated.View style={[styles.floatWrap, { width: w, height: h, transform: [{ rotate }] }]}>
-      <Animated.View style={style}>{card}</Animated.View>
-    </Animated.View>
-  );
-}
-
 function HeroCard({ index, color, value, type, w, h }: {
   index: number; color: string; value?: number; type: 'number' | 'wild' | 'draw2'; w: number; h: number;
 }) {
@@ -68,11 +39,17 @@ function HeroCard({ index, color, value, type, w, h }: {
   ) : (
     <NumberCard color={color} value={value ?? 0} width={w} height={h} borderRadius={Math.round(w * 0.14)} />
   );
-  return <FloatingCard index={index} card={card} w={w} h={h} rotate={`${(index - 2) * 12}deg`} />;
+
+  const rotate = `${(index - 2) * 12}deg`;
+  return (
+    <View style={[styles.floatWrap, { width: w, height: h, transform: [{ rotate }] }]}>
+      {card}
+    </View>
+  );
 }
 
 // ---------------------------------------------------------------------------
-// Interactive table preview
+// Luxury Stadium Poker Table Showcase
 // ---------------------------------------------------------------------------
 function TableMockup() {
   const cw = 60;
@@ -180,14 +157,13 @@ function TableMockup() {
 }
 
 // ---------------------------------------------------------------------------
-// Landing Screen
+// Landing Screen (Lightweight, SEO-Optimized, High Performance)
 // ---------------------------------------------------------------------------
 export default function LandingScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
   const isWide = width >= 760;
-
 
   const scrollToHowTo = () => {
     scrollRef.current?.scrollTo({ y: isWide ? 1150 : 1300, animated: true });
@@ -210,7 +186,7 @@ export default function LandingScreen() {
       >
         {/* ================= HERO ================= */}
         <View style={[styles.hero, { minHeight: isWide ? 580 : 500 }]}>
-          <Animated.View entering={FadeInDown.delay(80).duration(500)} style={styles.heroInner}>
+          <View style={styles.heroInner}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>MULTIPLAYER CARD GAME</Text>
             </View>
@@ -244,70 +220,70 @@ export default function LandingScreen() {
                 <View key={s} style={styles.statChip}><Text style={styles.statText}>{s}</Text></View>
               ))}
             </View>
-          </Animated.View>
+          </View>
 
           {/* Hero card fan */}
-          <Animated.View entering={FadeInUp.delay(380).duration(600)} style={styles.fanRow}>
+          <View style={styles.fanRow}>
             <HeroCard index={0} color={CardColor.YELLOW} value={5} type="number" w={fanW} h={fanH} />
             <HeroCard index={1} color={CardColor.GREEN} value={2} type="number" w={fanW} h={fanH} />
             <HeroCard index={2} color={CardColor.RED} value={7} type="number" w={fanW} h={fanH} />
             <HeroCard index={3} color={CardColor.BLUE} value={9} type="number" w={fanW} h={fanH} />
             <HeroCard index={4} color={CardColor.WILD} type="wild" w={fanW} h={fanH} />
-          </Animated.View>
+          </View>
         </View>
 
         {/* ================= LIVE TABLE ================= */}
         <View style={[styles.section, { maxWidth: 860 }]}>
-          <Animated.View entering={FadeInUp.delay(120).duration(450)} style={styles.sectionHead}>
+          <View style={styles.sectionHead}>
             <Text style={styles.sectionLabel}>LIVE PREVIEW</Text>
             <Text style={styles.sectionTitle}>It plays like the real deck.</Text>
-          </Animated.View>
-          <Animated.View entering={FadeInUp.delay(200).duration(500)}>
+          </View>
+          <View>
             <TableMockup />
-          </Animated.View>
+          </View>
         </View>
 
         {/* ================= FEATURES ================= */}
         <View style={[styles.section, { maxWidth: 960 }]}>
-          <Animated.View entering={FadeInUp.delay(120).duration(450)} style={styles.sectionHead}>
+          <View style={styles.sectionHead}>
             <Text style={styles.sectionLabel}>FEATURES</Text>
             <Text style={styles.sectionTitle}>Everything the real card game has.</Text>
-          </Animated.View>
+          </View>
           <View style={[styles.grid, isWide && styles.gridWide]}>
-            {FEATURES.map((f, i) => (
-              <Animated.View key={f.title} entering={FadeInUp.delay(180 + i * 80).duration(400)} style={[styles.featureCard, isWide && styles.featureCardWide]}>
+            {FEATURES.map((f) => (
+              <View key={f.title} style={[styles.featureCard, isWide && styles.featureCardWide]}>
                 <View style={[styles.featureIcon, { backgroundColor: f.accent + '18' }]}>
                   <Text style={styles.featureIconText}>{f.icon}</Text>
                 </View>
                 <Text style={styles.featureTitle}>{f.title}</Text>
                 <Text style={styles.featureDesc}>{f.desc}</Text>
-              </Animated.View>
+              </View>
             ))}
           </View>
         </View>
 
         {/* ================= HOW TO PLAY ================= */}
         <View style={[styles.section, { maxWidth: 960 }]}>
-          <Animated.View entering={FadeInUp.delay(120).duration(450)} style={styles.sectionHead}>
+          <View style={styles.sectionHead}>
             <Text style={styles.sectionLabel}>HOW TO PLAY</Text>
             <Text style={styles.sectionTitle}>Four steps to your first win.</Text>
-          </Animated.View>
+          </View>
           <View style={[styles.stepsRow, isWide && styles.stepsRowWide]}>
-            {STEPS.map((s, i) => (
-              <Animated.View key={s.n} entering={FadeInUp.delay(180 + i * 80).duration(400)} style={[styles.stepCard, isWide && styles.stepCardWide]}>
+            {STEPS.map((s) => (
+              <View key={s.n} style={[styles.stepCard, isWide && styles.stepCardWide]}>
                 <View style={styles.stepNumber}>
                   <Text style={styles.stepNumberText}>{s.n}</Text>
                 </View>
                 <Text style={styles.stepTitle}>{s.title}</Text>
                 <Text style={styles.stepDesc}>{s.desc}</Text>
-              </Animated.View>
+              </View>
             ))}
           </View>
         </View>
 
         {/* ================= CTA BAND ================= */}
         <View style={[styles.section, { maxWidth: 860 }]}>
-          <Animated.View entering={FadeInUp.delay(180).duration(500)}>
+          <View>
             <LinearGradient
               colors={['#E8364B', '#A0182A']}
               start={{ x: 0, y: 0 }}
@@ -320,7 +296,7 @@ export default function LandingScreen() {
                 <Text style={styles.ctaBandBtnText}>START PLAYING →</Text>
               </Pressable>
             </LinearGradient>
-          </Animated.View>
+          </View>
         </View>
 
         {/* ================= FOOTER ================= */}
@@ -348,53 +324,49 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,54,75,0.10)', borderWidth: 1, borderColor: 'rgba(232,54,75,0.30)',
     borderRadius: 999, paddingHorizontal: 18, paddingVertical: 7,
   },
-  badgeText: { color: Colors.red, fontSize: 11, fontWeight: '700', letterSpacing: 3 },
-
-  logoRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },
+  badgeText: { color: Colors.red, fontSize: 11, fontWeight: '800', letterSpacing: 2 },
+  logoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
   logoLetter: {
-    fontFamily: FONT, fontSize: 100, lineHeight: 104,
-    textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 20,
+    fontFamily: FONT, fontSize: 72, letterSpacing: -2,
+    textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 10,
   },
-  logoRed: { color: Colors.red, textShadowColor: 'rgba(232,54,75,0.4)' },
-  logoYellow: { color: Colors.yellow, textShadowColor: 'rgba(245,184,0,0.4)', marginHorizontal: -6 },
-  logoBlue: { color: Colors.blue, textShadowColor: 'rgba(43,139,245,0.4)' },
-
+  logoRed: { color: Colors.red },
+  logoYellow: { color: Colors.yellow, transform: [{ rotate: '-6deg' }] },
+  logoBlue: { color: Colors.blue, transform: [{ rotate: '4deg' }] },
   tagline: {
-    color: Colors.textSecondary, fontSize: 11, fontWeight: '700',
-    letterSpacing: 5, marginTop: 10,
+    color: Colors.textSecondary, fontSize: 13, fontWeight: '700',
+    letterSpacing: 3, marginTop: 10, textAlign: 'center',
   },
 
-  ctaRow: { flexDirection: 'row', gap: 12, marginTop: 28, justifyContent: 'center', flexWrap: 'wrap' },
-  ctaWrap: { minWidth: 190 },
+  ctaRow: { flexDirection: 'row', gap: 12, marginTop: 28, width: '100%', maxWidth: 380 },
+  ctaWrap: {},
   primaryCta: {
-    borderRadius: 16, paddingVertical: 16, paddingHorizontal: 28, alignItems: 'center',
-    shadowColor: Colors.red, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10,
+    paddingVertical: 14, paddingHorizontal: 28, borderRadius: 14, alignItems: 'center',
+    shadowColor: Colors.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8,
   },
-  primaryCtaText: { color: Colors.white, fontFamily: FONT, fontSize: 20, letterSpacing: 1.5, textAlign: 'center' },
+  primaryCtaText: { color: Colors.white, fontFamily: FONT, fontSize: 17, letterSpacing: 1 },
   secondaryCta: {
-    borderRadius: 16, paddingVertical: 14, paddingHorizontal: 28, alignItems: 'center',
-    borderWidth: 1.5, borderColor: 'rgba(255,220,180,0.15)', backgroundColor: 'rgba(28,22,30,0.7)',
-    justifyContent: 'center',
+    paddingVertical: 14, paddingHorizontal: 24, borderRadius: 14, alignItems: 'center',
+    backgroundColor: 'rgba(255,220,180,0.06)', borderWidth: 1, borderColor: 'rgba(255,220,180,0.15)',
   },
-  secondaryCtaText: { color: Colors.textPrimary, fontSize: 15, fontWeight: '700' },
+  secondaryCtaText: { color: Colors.textPrimary, fontSize: 14, fontWeight: '700' },
 
-  statsRow: { flexDirection: 'row', gap: 8, marginTop: 22, flexWrap: 'wrap', justifyContent: 'center' },
+  statsRow: { flexDirection: 'row', gap: 8, marginTop: 24 },
   statChip: {
-    backgroundColor: 'rgba(255,220,180,0.06)', borderWidth: 1, borderColor: 'rgba(255,220,180,0.10)',
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 5,
+    backgroundColor: 'rgba(255,220,180,0.05)', borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(255,220,180,0.08)',
   },
-  statText: { color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
+  statText: { color: Colors.textMuted, fontSize: 10, fontWeight: '700', letterSpacing: 1 },
 
-  floatWrap: {
-    shadowColor: '#000', shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
+  fanRow: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    marginTop: 36, height: 120,
   },
-
-  fanRow: { flexDirection: 'row', marginTop: 46, justifyContent: 'center', paddingHorizontal: 28 },
+  floatWrap: { marginHorizontal: -12 },
 
   // ---- Sections ----
-  section: { width: '100%', paddingHorizontal: 24, paddingTop: 72, alignSelf: 'center' },
-  sectionHead: { marginBottom: 24 },
+  section: { width: '100%', paddingHorizontal: 24, marginTop: 72 },
+  sectionHead: { marginBottom: 28, alignItems: 'flex-start' },
   sectionLabel: { color: Colors.metallicGold, fontSize: 11, fontWeight: '700', letterSpacing: 3, marginBottom: 6 },
   sectionTitle: { color: Colors.textPrimary, fontSize: 28, fontWeight: '800' },
 
