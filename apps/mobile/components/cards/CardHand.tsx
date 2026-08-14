@@ -76,7 +76,7 @@ export default function CardHand({ cards, topCard, currentColor, isMyTurn, onPla
 
       {/* Left fade mask */}
       <LinearGradient
-        colors={['rgba(13,13,26,1)', 'rgba(13,13,26,0)']}
+        colors={['rgba(12,10,15,0.9)', 'rgba(12,10,15,0)']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         style={styles.fadeLeft}
         pointerEvents="none"
@@ -84,7 +84,7 @@ export default function CardHand({ cards, topCard, currentColor, isMyTurn, onPla
 
       {/* Right fade mask */}
       <LinearGradient
-        colors={['rgba(13,13,26,0)', 'rgba(13,13,26,1)']}
+        colors={['rgba(12,10,15,0)', 'rgba(12,10,15,0.9)']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         style={styles.fadeRight}
         pointerEvents="none"
@@ -108,6 +108,7 @@ export default function CardHand({ cards, topCard, currentColor, isMyTurn, onPla
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
+    width: '100%',
   },
   frostedBg: {
     ...StyleSheet.absoluteFillObject,
@@ -123,16 +124,19 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   fadeLeft: {
-    position: 'absolute', left: 0, top: 0, bottom: 0, width: 28, zIndex: 10,
+    position: 'absolute', left: 0, top: 0, bottom: 0, width: 24, zIndex: 10,
     borderTopLeftRadius: 22,
   },
   fadeRight: {
-    position: 'absolute', right: 0, top: 0, bottom: 0, width: 28, zIndex: 10,
+    position: 'absolute', right: 0, top: 0, bottom: 0, width: 24, zIndex: 10,
     borderTopRightRadius: 22,
   },
   listContent: {
     alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
     paddingHorizontal: 28,
-    paddingTop: 10,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
 });

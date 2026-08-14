@@ -49,11 +49,11 @@ function seatsFor(count: number): SeatName[] | null {
 }
 
 const SEAT_STYLES: Record<SeatName, any> = {
-  top: { top: 0, alignSelf: 'center' },
-  topLeft: { left: 6, top: 0 },
-  topRight: { right: 6, top: 0 },
-  left: { left: 4, top: '40%' },
-  right: { right: 4, top: '40%' },
+  top: { top: -14, alignSelf: 'center' },
+  topLeft: { left: 16, top: -10 },
+  topRight: { right: 16, top: -10 },
+  left: { left: 6, top: '38%' },
+  right: { right: 6, top: '38%' },
 };
 
 interface FlyState {
@@ -348,36 +348,38 @@ export default function GameScreen() {
       <View style={styles.tableWrap}>
         {/* Opponents seated around the table (or a scroll row for 6+) */}
         {seats ? (
-          otherPlayers.map((player, idx) => {
-            const seat = seats[idx];
-            const playerGlobalIndex = gameState.players.findIndex(p => p.id === player.id);
-            const isActive = gameState.currentPlayerIndex === playerGlobalIndex;
-            const emoji = emojiReactions.find(e => e.playerId === player.id);
-            return (
-              <View key={player.id} style={[styles.seat, SEAT_STYLES[seat]]}>
-                <PlayerSlot
-                  player={player}
-                  isActive={isActive}
-                  position={seat === 'left' ? 'left' : seat === 'right' ? 'right' : 'top'}
-                  totalPlayers={gameState.players.length}
-                  effect={slotEffectFor(player.id, effects)}
-                />
-                {/* Catch UNO button */}
-                {player.cardCount === 1 && !player.hasCalledUno && (
-                  <PressableScale
-                    style={styles.catchButton}
-                    onPress={() => { haptics.heavyImpact(); callCatch(player.id); }}
-                  >
-                    <Text style={styles.catchButtonText}>CATCH!</Text>
-                  </PressableScale>
-                )}
-                {/* Emoji float */}
-                {emoji && (
-                  <Text style={styles.emojiFloat}>{emoji.emoji}</Text>
-                )}
-              </View>
-            );
-          })
+          <View style={styles.seatsContainer} pointerEvents="box-none">
+            {otherPlayers.map((player, idx) => {
+              const seat = seats[idx];
+              const playerGlobalIndex = gameState.players.findIndex(p => p.id === player.id);
+              const isActive = gameState.currentPlayerIndex === playerGlobalIndex;
+              const emoji = emojiReactions.find(e => e.playerId === player.id);
+              return (
+                <View key={player.id} style={[styles.seat, SEAT_STYLES[seat]]}>
+                  <PlayerSlot
+                    player={player}
+                    isActive={isActive}
+                    position={seat === 'left' ? 'left' : seat === 'right' ? 'right' : 'top'}
+                    totalPlayers={gameState.players.length}
+                    effect={slotEffectFor(player.id, effects)}
+                  />
+                  {/* Catch UNO button */}
+                  {player.cardCount === 1 && !player.hasCalledUno && (
+                    <PressableScale
+                      style={styles.catchButton}
+                      onPress={() => { haptics.heavyImpact(); callCatch(player.id); }}
+                    >
+                      <Text style={styles.catchButtonText}>CATCH!</Text>
+                    </PressableScale>
+                  )}
+                  {/* Emoji float */}
+                  {emoji && (
+                    <Text style={styles.emojiFloat}>{emoji.emoji}</Text>
+                  )}
+                </View>
+              );
+            })}
+          </View>
         ) : (
           <View style={styles.opponentsWrap}>
             <ScrollView
@@ -424,9 +426,9 @@ export default function GameScreen() {
             end={{ x: 0.8, y: 1 }}
             style={styles.felt}
           >
-            {/* Felt inner shading */}
+            {/* Felt inner shading & texture wash */}
             <LinearGradient
-              colors={['rgba(255,255,255,0.10)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.30)']}
+              colors={['rgba(255,255,255,0.08)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
               style={StyleSheet.absoluteFill}
@@ -458,13 +460,13 @@ export default function GameScreen() {
                     style={[styles.splash, { backgroundColor: getColorHex(splashEffect.color || currentColor) }]}
                   />
                 )}
-                  <DiscardPile
-                    topCard={topCard}
-                    currentColor={currentColor}
-                    cardWidth={pileW}
-                    cardHeight={pileH}
-                  />
-                </View>
+                <DiscardPile
+                  topCard={topCard}
+                  currentColor={currentColor}
+                  cardWidth={pileW}
+                  cardHeight={pileH}
+                />
+              </View>
             </View>
 
             {/* Turn indicator */}
@@ -531,9 +533,6 @@ export default function GameScreen() {
           <Text style={styles.emojiToggleText}>😊</Text>
         </PressableScale>
       </View>
-
-      {/* Reserved banner ad slot (bottom, collapsible, labeled) */}
-      <AdBannerSlot />
 
       {/* Player's hand at bottom */}
       <View ref={handRef} collapsable={false} style={styles.handArea}>
@@ -662,9 +661,21 @@ function getColorHex(color: CardColor): string {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    width: '100%',
+    height: '100%',
+  },
   loadingText: { color: Colors.textPrimary, fontSize: 16, textAlign: 'center', marginTop: 120 },
-  gameContent: { flex: 1 },
+  gameContent: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 780,
+    alignSelf: 'center',
+    justifyContent: 'space-between',
+    paddingTop: Platform.OS === 'web' ? 12 : 44,
+  },
   hitFlash: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 200,
@@ -686,8 +697,11 @@ const styles = StyleSheet.create({
   },
 
   topBar: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 16, paddingTop: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 2,
   },
   iconBtn: {
     width: 36, height: 36, borderRadius: 18,
@@ -699,11 +713,11 @@ const styles = StyleSheet.create({
   roundText: { color: Colors.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 2 },
   roomText: { color: Colors.textMuted, fontSize: 10, fontWeight: '600', marginTop: 2, letterSpacing: 1 },
 
-  statusRow: { alignItems: 'center', marginTop: 8 },
+  statusRow: { alignItems: 'center', marginVertical: 2 },
   colorChip: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: 'rgba(255,220,180,0.06)', borderRadius: 10,
-    paddingHorizontal: 10, paddingVertical: 5,
+    paddingHorizontal: 10, paddingVertical: 4,
   },
   colorDot: { width: 10, height: 10, borderRadius: 5, marginRight: 6 },
   colorLabel: { color: Colors.textPrimary, fontSize: 11, fontWeight: '700', letterSpacing: 1 },
@@ -722,13 +736,20 @@ const styles = StyleSheet.create({
 
   // ---- Table ----
   tableWrap: {
-    flex: 1, justifyContent: 'center', paddingHorizontal: 14, position: 'relative',
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    marginVertical: 4,
+    position: 'relative',
   },
-  seat: {
-    position: 'absolute', zIndex: 20, alignItems: 'center',
+  seatsContainer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 25,
   },
   opponentsWrap: {
-    position: 'absolute', top: -4, left: 0, right: 0, zIndex: 20,
+    position: 'absolute', top: -10, left: 0, right: 0, zIndex: 25,
   },
   opponentsContent: { paddingHorizontal: 12, gap: 6 },
   opponentsCentered: { justifyContent: 'center' },
@@ -740,38 +761,60 @@ const styles = StyleSheet.create({
   emojiFloat: { position: 'absolute', top: -20, fontSize: 24 },
 
   tableRim: {
-    marginTop: 30,
-    borderRadius: 36,
+    width: '100%',
+    maxWidth: 680,
+    height: '100%',
+    minHeight: 280,
+    maxHeight: 380,
+    borderRadius: 54,
     padding: 10,
     backgroundColor: '#261812',
-    borderWidth: 1.5,
+    borderWidth: 2.5,
     borderColor: '#3D2A1F',
-    shadowColor: '#000000', shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5, shadowRadius: 22, elevation: 16,
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.6, shadowRadius: 26, elevation: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   felt: {
-    flex: 1,
-    borderRadius: 28,
+    width: '100%',
+    height: '100%',
+    borderRadius: 44,
     borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.25)',
+    borderColor: 'rgba(0,0,0,0.30)',
     overflow: 'hidden',
     justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
   },
   centerArea: {
-    flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
   },
-  directionWrap: { width: 52, alignItems: 'center' },
+  directionWrap: { width: 48, alignItems: 'center' },
   directionInline: { position: 'relative', top: 0, right: 0 },
   turnPill: {
-    position: 'absolute', bottom: 12, alignSelf: 'center',
-    backgroundColor: 'rgba(28, 22, 30, 0.80)', borderRadius: 14,
-    paddingHorizontal: 16, paddingVertical: 5, borderWidth: 1, borderColor: 'rgba(255,220,180,0.12)',
+    position: 'absolute',
+    bottom: 12,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(28, 22, 30, 0.85)',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,220,180,0.15)',
+    shadowColor: Colors.yellow,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
   },
   turnText: { color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
   turnTextMine: { color: Colors.yellow, textShadowColor: 'rgba(245,184,0,0.35)', textShadowRadius: 6 },
 
   jumpInButton: {
-    position: 'absolute', top: 150, alignSelf: 'center', zIndex: 60,
+    position: 'absolute', top: 140, alignSelf: 'center', zIndex: 60,
     backgroundColor: Colors.red, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 7,
     shadowColor: Colors.red, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 12,
     elevation: 10, borderWidth: 2, borderColor: Colors.cream,
@@ -816,10 +859,10 @@ const styles = StyleSheet.create({
   emojiToggleActive: { backgroundColor: 'rgba(212,168,67,0.15)', borderColor: Colors.metallicGold },
   emojiToggleText: { fontSize: 15 },
 
-  handArea: { paddingBottom: 8, paddingTop: 4 },
+  handArea: { paddingBottom: 6, paddingTop: 2 },
   handLabel: {
     color: Colors.textMuted, fontSize: 10, fontWeight: '600', textAlign: 'center',
-    marginBottom: 4, opacity: 0.5, letterSpacing: 1,
+    marginBottom: 4, opacity: 0.6, letterSpacing: 1,
   },
 });
 

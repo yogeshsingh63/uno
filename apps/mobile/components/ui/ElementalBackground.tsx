@@ -2,17 +2,15 @@
 // ElementalBackground — Warm Ambient Lounge backdrop
 // Soft warm-toned gradient wash with gentle floating light motes
 // and a subtle radial warmth glow. Minimal, elegant, and warm.
-// NO cold neon. Feels like a premium card lounge at night.
+// Runs smoothly across mobile, tablet, and desktop viewports.
 // ============================================================
 import React, { memo, useMemo } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions, Platform } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
   withDelay, Easing, useReducedMotion,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-
-const { width: SW, height: SH } = Dimensions.get('window');
 
 export type ElementalVariant = 'embers' | 'cosmic' | 'ocean';
 
@@ -27,6 +25,7 @@ interface MoteConfig {
   delay: number;
   driftX: number;
   maxOpacity: number;
+  screenH: number;
 }
 
 function Mote({ config }: { config: MoteConfig }) {
@@ -43,10 +42,10 @@ function Mote({ config }: { config: MoteConfig }) {
 
   const style = useAnimatedStyle(() => {
     if (reduceMotion) {
-      return { opacity: config.maxOpacity * 0.5, transform: [{ translateX: config.startX }, { translateY: SH * 0.4 }] };
+      return { opacity: config.maxOpacity * 0.5, transform: [{ translateX: config.startX }, { translateY: config.screenH * 0.4 }] };
     }
     const p = progress.value;
-    const y = config.startY - p * (SH * 0.7);
+    const y = config.startY - p * (config.screenH * 0.75);
     const x = config.startX + Math.sin(p * Math.PI * 2) * config.driftX;
     const opacity = Math.sin(p * Math.PI) * config.maxOpacity;
     return { opacity, transform: [{ translateX: x }, { translateY: y }] };
@@ -97,24 +96,34 @@ function WarmGlow({ color, size, left, top, opacity, delay }: {
 
 /* ---- Main component ---- */
 function ElementalBackground({ variant = 'embers', lite = false }: { variant?: ElementalVariant; lite?: boolean }) {
+  const { width: SW, height: SH } = useWindowDimensions();
+
   const motes = useMemo<MoteConfig[]>(() => {
     const colors = ['#F5B800', '#E8364B', '#D4A843', '#FFF5E6', '#A855F7'];
-    const count = lite ? 10 : 18;
+    const count = lite ? 8 : 16;
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       size: 2 + Math.random() * 3,
-      startX: Math.random() * SW,
-      startY: SH + Math.random() * 80,
+      startX: Math.random() * (SW || 400),
+      startY: (SH || 800) + Math.random() * 80,
       color: colors[i % colors.length],
       duration: 12000 + Math.random() * 8000,
       delay: Math.random() * 8000,
       driftX: 15 + Math.random() * 25,
       maxOpacity: 0.15 + Math.random() * 0.25,
+      screenH: SH || 800,
     }));
-  }, [lite]);
+  }, [lite, SW, SH]);
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.container]}>
+    <View
+      pointerEvents="none"
+      style={[
+        StyleSheet.absoluteFill,
+        styles.container,
+        Platform.OS === 'web' && ({ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 } as any),
+      ]}
+    >
       {/* Base gradient — deep warm charcoal */}
       <LinearGradient
         colors={['#100810', '#0c0a0f', '#0e0a0c', '#0a080c']}
@@ -123,26 +132,17 @@ function ElementalBackground({ variant = 'embers', lite = false }: { variant?: E
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Warm ambient glows — subtle large blurred circles */}
-      <WarmGlow color="#3A1520" size={600} left={-200} top={-150} opacity={0.4} delay={0} />
-      <WarmGlow color="#1A1028" size={500} left={Math.round(SW * 0.5)} top={Math.round(SH * 0.4)} opacity={0.3} delay={2000} />
-      <WarmGlow color="#1C1008" size={450} left={Math.round(SW * 0.3)} top={Math.round(SH * 0.7)} opacity={0.25} delay={4000} />
+      {/* Warm ambient glows */}
+      <WarmGlow color="#3A1520" size={Math.max(400, SW * 0.7)} left={-100} top={-100} opacity={0.35} delay={0} />
+      <WarmGlow color="#1A1028" size={Math.max(350, SW * 0.6)} left={Math.round(SW * 0.5)} top={Math.round(SH * 0.35)} opacity={0.25} delay={2000} />
+      <WarmGlow color="#1C1008" size={Math.max(300, SW * 0.5)} left={Math.round(SW * 0.2)} top={Math.round(SH * 0.65)} opacity={0.2} delay={4000} />
 
       {/* Floating warm motes */}
       {motes.map((m) => <Mote key={m.id} config={m} />)}
 
-      {/* Subtle warm top-down wash */}
-      <LinearGradient
-        colors={['rgba(60,30,15,0.08)', 'rgba(0,0,0,0)']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.4 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-
       {/* Edge vignette */}
       <LinearGradient
-        colors={['rgba(0,0,0,0)', 'rgba(6,4,8,0.5)']}
+        colors={['rgba(0,0,0,0)', 'rgba(6,4,8,0.45)']}
         start={{ x: 0.5, y: 0.2 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -153,7 +153,9 @@ function ElementalBackground({ variant = 'embers', lite = false }: { variant?: E
 }
 
 const styles = StyleSheet.create({
-  container: { pointerEvents: 'none' },
+  container: {
+    overflow: 'hidden',
+  },
   mote: { position: 'absolute' },
   glow: {
     position: 'absolute',

@@ -1,6 +1,7 @@
 // ============================================================
 // PlayerSlot — Opponent display with turn ring + special-card
 // effect moments (skip X-flash, +2/+4 hit, UNO caught).
+// Clean, elegant player capsule with proper UNO branding.
 // ============================================================
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
@@ -9,7 +10,6 @@ import Animated, {
   useSharedValue, withDelay,
 } from 'react-native-reanimated';
 import { PlayerGameState } from '@uno/shared';
-import CardMini from '../cards/CardMini';
 import AvatarBadge from '../ui/AvatarBadge';
 import { Colors } from '../../constants/colors';
 import { createSkipAnimation } from '../../utils/cardAnimations';
@@ -19,11 +19,10 @@ interface PlayerSlotProps {
   isActive: boolean;
   position?: 'top' | 'topLeft' | 'topRight' | 'left' | 'right';
   totalPlayers?: number;
-  /** Transient special-card effect targeting this player */
   effect?: { kind: 'skip' | 'hit' | 'caught' } | null;
 }
 
-function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effect }: PlayerSlotProps) {
+function PlayerSlot({ player, isActive, position = 'top', effect }: PlayerSlotProps) {
   const ringOpacity = useSharedValue(0);
   const xMarkScale = useSharedValue(0);
   const xMarkOpacity = useSharedValue(0);
@@ -37,7 +36,7 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
       ringOpacity.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 600 }),
-          withTiming(0.4, { duration: 600 }),
+          withTiming(0.35, { duration: 600 }),
         ), -1, true
       );
     } else {
@@ -57,7 +56,6 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
     }
 
     if (effect.kind === 'skip') {
-      // Grey out + red X pop
       dimOpacity.value = withSequence(
         withTiming(0.45, { duration: 120 }),
         withDelay(700, withTiming(1, { duration: 250 })),
@@ -70,7 +68,6 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
         withTiming(0, { duration: 45 }),
       );
     } else if (effect.kind === 'hit') {
-      // Red flash ring + shake
       hitRingOpacity.value = withSequence(
         withTiming(1, { duration: 80 }),
         withDelay(420, withTiming(0, { duration: 260 })),
@@ -88,7 +85,6 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
         withDelay(500, withTiming(1, { duration: 200 })),
       );
     } else if (effect.kind === 'caught') {
-      // Red X + shake (gotcha!)
       createSkipAnimation(xMarkScale, xMarkOpacity);
       hitRingOpacity.value = withSequence(
         withTiming(1, { duration: 80 }),
@@ -102,11 +98,10 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
         withTiming(0, { duration: 45 }),
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effect?.kind]);
 
   const ringStyle = useAnimatedStyle(() => ({
-    borderColor: isActive ? Colors.neonCyan : 'transparent',
+    borderColor: isActive ? Colors.yellow : 'transparent',
     opacity: ringOpacity.value,
   }));
 
@@ -127,53 +122,41 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
     opacity: xMarkOpacity.value,
   }));
 
-  // Connection dot color
   const dotColor = player.isConnected ? Colors.green : Colors.error;
+  const isUno = player.cardCount === 1;
 
   return (
     <Animated.View style={[styles.container, containerStyle]}>
-      {/* Avatar with turn ring */}
-      <View style={styles.avatarContainer}>
-        <Animated.View style={[styles.turnRing, ringStyle]} />
-        <Animated.View style={[styles.hitRing, hitRingStyle]} />
-        <AvatarBadge
-          emoji={player.avatar}
-          size={36}
-        />
+      {/* Player Card Pod */}
+      <View style={[styles.pod, isActive && styles.podActive]}>
+        {/* Avatar with turn ring */}
+        <View style={styles.avatarContainer}>
+          <Animated.View style={[styles.turnRing, ringStyle]} />
+          <Animated.View style={[styles.hitRing, hitRingStyle]} />
+          <AvatarBadge emoji={player.avatar} size={36} />
 
-        {/* Skip / caught X mark */}
-        <Animated.View style={[styles.xMark, xMarkStyle]} pointerEvents="none">
-          <Text style={styles.xMarkText}>✕</Text>
-        </Animated.View>
+          {/* Skip / caught X mark */}
+          <Animated.View style={[styles.xMark, xMarkStyle]} pointerEvents="none">
+            <Text style={styles.xMarkText}>✕</Text>
+          </Animated.View>
 
-        {/* Connection dot */}
-        <View style={[styles.connectionDot, { backgroundColor: dotColor }]} />
+          {/* Connection dot */}
+          <View style={[styles.connectionDot, { backgroundColor: dotColor }]} />
+        </View>
 
-        {/* UNO badge */}
-        {player.cardCount === 1 && (
-          <View style={styles.unoBadge}>
-            <Text style={styles.unoBadgeText}>1</Text>
+        {/* Info Column */}
+        <View style={styles.infoCol}>
+          <Text style={[styles.name, isActive && styles.nameActive]} numberOfLines={1}>
+            {player.name}
+          </Text>
+
+          {/* Card count pill */}
+          <View style={[styles.cardBadge, isUno && styles.unoBadge]}>
+            <Text style={[styles.cardBadgeText, isUno && styles.unoBadgeText]}>
+              {isUno ? 'UNO! 1' : `${player.cardCount} CARDS`}
+            </Text>
           </View>
-        )}
-      </View>
-
-      {/* Name */}
-      <Text style={[styles.name, isActive && styles.nameActive]} numberOfLines={1}>
-        {player.name}
-      </Text>
-
-      {/* Card count */}
-      <View style={styles.cardCountBadge}>
-        <Text style={styles.cardCountText}>{player.cardCount}♠</Text>
-      </View>
-
-      {/* Mini cards */}
-      <View style={styles.miniCardsContainer}>
-        <CardMini
-          count={player.cardCount}
-          playerCount={totalPlayers}
-          isUno={player.cardCount === 1}
-        />
+        </View>
       </View>
     </Animated.View>
   );
@@ -182,29 +165,55 @@ function PlayerSlot({ player, isActive, position = 'top', totalPlayers = 4, effe
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    minWidth: 60,
-    maxWidth: 120,
+    marginHorizontal: 4,
+  },
+  pod: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(28, 22, 30, 0.85)',
+    borderRadius: 22,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 220, 180, 0.12)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  podActive: {
+    borderColor: Colors.yellow,
+    backgroundColor: 'rgba(38, 28, 38, 0.95)',
+    shadowColor: Colors.yellow,
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
   },
   avatarContainer: {
     position: 'relative',
+    marginRight: 6,
   },
   turnRing: {
     position: 'absolute',
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 2.5,
-    top: -5,
-    left: -5,
+    top: -4,
+    left: -4,
+    shadowColor: Colors.yellow,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
   },
   hitRing: {
     position: 'absolute',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 3,
-    top: -7,
-    left: -7,
+    top: -6,
+    left: -6,
     borderColor: Colors.red,
     shadowColor: Colors.red,
     shadowOffset: { width: 0, height: 0 },
@@ -213,79 +222,67 @@ const styles = StyleSheet.create({
   },
   xMark: {
     position: 'absolute',
-    top: -8,
-    right: -8,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: '#E53935',
+    top: -6,
+    right: -6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: Colors.red,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.white,
     zIndex: 5,
   },
   xMarkText: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: Colors.white,
+    fontSize: 12,
     fontWeight: '900',
-    lineHeight: 16,
   },
   connectionDot: {
     position: 'absolute',
-    bottom: 0,
-    right: -2,
+    bottom: -1,
+    right: -1,
     width: 8,
     height: 8,
     borderRadius: 4,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.background,
   },
-  unoBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -6,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#E53935',
+  infoCol: {
     justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-  },
-  unoBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontWeight: '900',
+    maxWidth: 90,
   },
   name: {
-    color: Colors.textSecondary,
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 3,
-    maxWidth: 80,
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 2,
   },
   nameActive: {
-    color: Colors.neonCyan,
+    color: Colors.yellow,
     fontWeight: '800',
   },
-  cardCountBadge: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginTop: 2,
+  cardBadge: {
+    backgroundColor: 'rgba(255, 220, 180, 0.08)',
+    borderRadius: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    alignSelf: 'flex-start',
   },
-  cardCountText: {
-    color: Colors.textMuted,
-    fontSize: 10,
+  cardBadgeText: {
+    color: Colors.textSecondary,
+    fontSize: 9,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
-  miniCardsContainer: {
-    marginTop: 4,
-    height: 70,
-    overflow: 'hidden',
+  unoBadge: {
+    backgroundColor: Colors.red,
+  },
+  unoBadgeText: {
+    color: Colors.white,
+    fontWeight: '900',
+    letterSpacing: 1,
   },
 });
 

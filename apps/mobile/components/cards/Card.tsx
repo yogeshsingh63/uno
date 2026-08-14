@@ -164,10 +164,10 @@ function CardComponent({
 
 const styles = StyleSheet.create({
   glowContainer: {
-    shadowColor: 'rgba(255,255,255,0.75)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 18,
-    elevation: 8,
+    shadowColor: Colors.metallicGold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 4,
   },
 });
 
