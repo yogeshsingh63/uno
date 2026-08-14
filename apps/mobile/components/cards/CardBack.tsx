@@ -1,11 +1,13 @@
 // ============================================================
 // CardBack — Official Authentic UNO Card Back
-// Classic black background with white outer frame, giant tilted
-// oval with the official bold italic "UNO" wordmark.
+// Outer white border, solid black body, giant tilted red oval,
+// and the iconic 3D golden-yellow "UNO" wordmark.
 // ============================================================
 import React, { memo } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, View } from 'react-native';
+import Svg, {
+  Rect, Ellipse, G, Text as SvgText, Defs, ClipPath, LinearGradient, Stop,
+} from 'react-native-svg';
 
 interface CardBackProps {
   width: number;
@@ -14,82 +16,110 @@ interface CardBackProps {
 }
 
 function CardBack({ width, height, borderRadius = 10 }: CardBackProps) {
-  const ovalW = width * 0.74;
-  const ovalH = height * 0.48;
-  const ovalRadius = ovalH / 2;
-  const fontSize = Math.round(ovalH * 0.50);
-  const actualBorderWidth = Math.max(2.5, width * 0.045);
-
   return (
-    <View
-      style={[styles.card, {
-        width,
-        height,
-        borderRadius,
-        borderWidth: actualBorderWidth,
-      }]}
-    >
-      <LinearGradient
-        colors={['#1F1F26', '#111116', '#09090D']}
-        start={{ x: 0.2, y: 0 }}
-        end={{ x: 0.8, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={[styles.card, { width, height, borderRadius }]}>
+      <Svg width={width} height={height} viewBox="0 0 100 148">
+        <Defs>
+          {/* Card inner body clip path */}
+          <ClipPath id="cardBackClip">
+            <Rect x="4.5" y="4.5" width="91" height="139" rx="6" />
+          </ClipPath>
 
-      {/* Red Center Oval Ring */}
-      <View
-        style={[styles.redOval, {
-          width: ovalW * 1.05,
-          height: ovalH * 1.05,
-          borderRadius: (ovalH * 1.05) / 2,
-        }]}
-      />
+          {/* Gold Gradient for UNO Text */}
+          <LinearGradient id="unoGold" x1="0%" y1="0%" x2="0%" y2="100%">
+            <Stop offset="0%" stopColor="#FFF466" />
+            <Stop offset="45%" stopColor="#FFD400" />
+            <Stop offset="100%" stopColor="#FF9500" />
+          </LinearGradient>
+        </Defs>
 
-      {/* White Tilted Center Oval with UNO Mark */}
-      <View style={[styles.oval, { width: ovalW, height: ovalH, borderRadius: ovalRadius }]}>
-        <Text style={[styles.unoText, { fontSize }]}>UNO</Text>
-      </View>
+        {/* 1. Outer White Card Frame */}
+        <Rect x="1" y="1" width="98" height="146" rx="8.5" fill="#FFFFFF" />
+
+        {/* 2. Inner Solid Black Field */}
+        <Rect x="4.5" y="4.5" width="91" height="139" rx="6" fill="#0B0B0E" />
+
+        {/* 3. The Iconic Giant Red Filled Oval */}
+        <G clipPath="url(#cardBackClip)">
+          <Ellipse
+            cx="50"
+            cy="74"
+            rx="38"
+            ry="58"
+            fill="#ED1C24"
+            transform="rotate(-33, 50, 74)"
+          />
+        </G>
+
+        {/* 4. The 3D Golden "UNO" Wordmark */}
+        <G transform="rotate(-12, 50, 74)">
+          {/* 3D Drop Extrusion Layers (Dark Warm Gold/Brown) */}
+          <SvgText
+            x="53"
+            y="87"
+            fontSize="36"
+            fontWeight="900"
+            fontStyle="italic"
+            textAnchor="middle"
+            fill="#5A1E00"
+            fontFamily="Arial, sans-serif"
+          >
+            UNO
+          </SvgText>
+          <SvgText
+            x="52"
+            y="86"
+            fontSize="36"
+            fontWeight="900"
+            fontStyle="italic"
+            textAnchor="middle"
+            fill="#7A2D00"
+            fontFamily="Arial, sans-serif"
+          >
+            UNO
+          </SvgText>
+          <SvgText
+            x="51"
+            y="85"
+            fontSize="36"
+            fontWeight="900"
+            fontStyle="italic"
+            textAnchor="middle"
+            fill="#9C4400"
+            fontFamily="Arial, sans-serif"
+          >
+            UNO
+          </SvgText>
+
+          {/* Front Golden Yellow UNO Text */}
+          <SvgText
+            x="50"
+            y="84"
+            fontSize="36"
+            fontWeight="900"
+            fontStyle="italic"
+            textAnchor="middle"
+            fill="url(#unoGold)"
+            stroke="#D88000"
+            strokeWidth="0.8"
+            fontFamily="Arial, sans-serif"
+          >
+            UNO
+          </SvgText>
+        </G>
+      </Svg>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    justifyContent: 'center',
-    alignItems: 'center',
     overflow: 'hidden',
-    borderColor: '#FFFFFF',
-    backgroundColor: '#111116',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 8,
     elevation: 6,
-  },
-  redOval: {
-    position: 'absolute',
-    backgroundColor: '#D71921',
-    transform: [{ rotate: '-28deg' }],
-  },
-  oval: {
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: [{ rotate: '-28deg' }],
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  unoText: {
-    fontWeight: '900',
-    fontStyle: 'italic',
-    color: '#D71921',
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 1.5, height: 1.5 },
-    textShadowRadius: 1,
-    includeFontPadding: false,
   },
 });
 
